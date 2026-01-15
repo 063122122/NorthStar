@@ -580,6 +580,84 @@
             line-height: 1.5;
         }
 
+        /* Data View */
+        .data-view {
+            padding: 10px 0;
+        }
+
+        .data-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .data-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 18px 24px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .data-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .data-btn.export {
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-color: var(--accent);
+        }
+
+        .data-btn.export:hover {
+            background: var(--accent-dim);
+            border-color: var(--accent-dim);
+        }
+
+        .data-btn.import {
+            border-style: dashed;
+        }
+
+        .data-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .data-stat {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .data-stat-value {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .data-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         /* Places View */
         .places-header {
             display: flex;
@@ -875,6 +953,7 @@
             <button class="nav-tab" data-view="navigate">Navigate</button>
             <button class="nav-tab" data-view="routes">Routes</button>
             <button class="nav-tab" data-view="places">Places</button>
+            <button class="nav-tab" data-view="data">Data</button>
         </nav>
 
         <main class="content">
@@ -998,6 +1077,49 @@
                         <p><strong>Save your favourite places</strong><br><br>
                         Go to a location you visit often (home, work, shops, etc.) then tap <strong>+ Add Current</strong> to save it.<br><br>
                         You can then navigate back to these places from anywhere!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data View -->
+            <div class="view" id="dataView">
+                <div class="data-view">
+                    <div class="instruction-card">
+                        <h4>Your Walker Data</h4>
+                        <p>Export your routes and places to keep a backup. Import to restore after updates.</p>
+                    </div>
+
+                    <div class="data-actions">
+                        <button class="data-btn export" id="exportDataBtn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                            </svg>
+                            <span>Download WalkerData</span>
+                        </button>
+
+                        <button class="data-btn import" id="importDataBtn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                            </svg>
+                            <span>Upload WalkerData</span>
+                        </button>
+
+                        <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                    </div>
+
+                    <div class="data-stats" id="dataStats">
+                        <div class="data-stat">
+                            <span class="data-stat-value" id="totalRoutes">0</span>
+                            <span class="data-stat-label">Routes</span>
+                        </div>
+                        <div class="data-stat">
+                            <span class="data-stat-value" id="totalPlaces">0</span>
+                            <span class="data-stat-label">Places</span>
+                        </div>
+                        <div class="data-stat">
+                            <span class="data-stat-value" id="totalPoints">0</span>
+                            <span class="data-stat-label">GPS Points</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1498,6 +1620,7 @@
                 showToast(`Route "${name}" saved!`, 'success');
                 renderRoutes();
                 updateDestinationDropdown();
+                updateDataStats();
             } catch (e) {
                 showToast('Failed to save route', 'error');
                 console.error(e);
@@ -1850,6 +1973,7 @@
                 showToast(`Place "${name}" saved!`, 'success');
                 renderPlaces();
                 updateDestinationDropdown();
+                updateDataStats();
             } catch (e) {
                 showToast('Failed to save place', 'error');
                 console.error(e);
@@ -1864,6 +1988,7 @@
                 state.places = state.places.filter(p => p.id !== id);
                 renderPlaces();
                 updateDestinationDropdown();
+                updateDataStats();
                 showToast('Place deleted', 'success');
             } catch (e) {
                 showToast('Failed to delete place', 'error');
@@ -1875,6 +2000,7 @@
                 await dbDelete('routes', id);
                 state.routes = state.routes.filter(r => r.id !== id);
                 renderRoutes();
+                updateDataStats();
                 showToast('Route deleted', 'success');
             } catch (e) {
                 showToast('Failed to delete route', 'error');
@@ -1953,6 +2079,115 @@
             setTimeout(() => {
                 elements.toast.classList.remove('show');
             }, 3000);
+        }
+
+        // ============================================
+        // Data Export/Import
+        // ============================================
+
+        async function exportWalkerData() {
+            try {
+                const routes = await dbGetAll('routes');
+                const places = await dbGetAll('places');
+                
+                const walkerData = {
+                    version: 1,
+                    exportedAt: new Date().toISOString(),
+                    app: 'NorthPath',
+                    routes: routes,
+                    places: places
+                };
+
+                const dataStr = JSON.stringify(walkerData, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const date = new Date().toISOString().split('T')[0];
+                const filename = `WalkerData_${date}.json`;
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showToast(`Downloaded ${filename}`, 'success');
+            } catch (e) {
+                console.error('Export failed:', e);
+                showToast('Export failed', 'error');
+            }
+        }
+
+        async function importWalkerData(file) {
+            try {
+                const text = await file.text();
+                const walkerData = JSON.parse(text);
+                
+                // Validate it's a WalkerData file
+                if (!walkerData.app || walkerData.app !== 'NorthPath') {
+                    // Also accept old PathMem files
+                    if (walkerData.app !== 'PathMem') {
+                        showToast('Invalid WalkerData file', 'error');
+                        return;
+                    }
+                }
+
+                let routesImported = 0;
+                let placesImported = 0;
+
+                // Import routes
+                if (walkerData.routes && Array.isArray(walkerData.routes)) {
+                    for (const route of walkerData.routes) {
+                        // Remove old ID so it gets a new one
+                        const { id, ...routeData } = route;
+                        await dbAdd('routes', routeData);
+                        routesImported++;
+                    }
+                }
+
+                // Import places
+                if (walkerData.places && Array.isArray(walkerData.places)) {
+                    for (const place of walkerData.places) {
+                        // Remove old ID so it gets a new one
+                        const { id, ...placeData } = place;
+                        await dbAdd('places', placeData);
+                        placesImported++;
+                    }
+                }
+
+                // Reload data
+                state.routes = await dbGetAll('routes');
+                state.places = await dbGetAll('places');
+                
+                // Re-render UI
+                renderRoutes();
+                renderPlaces();
+                updateDestinationDropdown();
+                updateDataStats();
+
+                showToast(`Imported ${routesImported} routes, ${placesImported} places`, 'success');
+            } catch (e) {
+                console.error('Import failed:', e);
+                showToast('Import failed - invalid file', 'error');
+            }
+        }
+
+        function updateDataStats() {
+            const totalRoutes = state.routes.length;
+            const totalPlaces = state.places.length;
+            let totalPoints = 0;
+            
+            for (const route of state.routes) {
+                if (route.points) {
+                    totalPoints += route.points.length;
+                }
+            }
+
+            document.getElementById('totalRoutes').textContent = totalRoutes;
+            document.getElementById('totalPlaces').textContent = totalPlaces;
+            document.getElementById('totalPoints').textContent = totalPoints;
         }
 
         // ============================================
@@ -2229,6 +2464,21 @@
                     document.getElementById('confirmSavePlace').click();
                 }
             });
+
+            // Data export/import
+            document.getElementById('exportDataBtn').addEventListener('click', exportWalkerData);
+            
+            document.getElementById('importDataBtn').addEventListener('click', () => {
+                document.getElementById('importFileInput').click();
+            });
+
+            document.getElementById('importFileInput').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    importWalkerData(file);
+                    e.target.value = ''; // Reset so same file can be selected again
+                }
+            });
         }
 
         // ============================================
@@ -2264,6 +2514,7 @@
                 renderRoutes();
                 renderPlaces();
                 updateDestinationDropdown();
+                updateDataStats();
 
                 // Setup event listeners
                 setupEventListeners();
