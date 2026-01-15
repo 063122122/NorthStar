@@ -11,53 +11,6 @@ A Progressive Web App that learns your walking routes and helps you navigate usi
 - **Offline Support**: Works without internet once installed
 - **No Account Required**: All data stored locally on your device
 
-## Free Hosting on GitHub Pages
-
-### Step 1: Create a GitHub Account (if you don't have one)
-1. Go to https://github.com
-2. Click "Sign up" and create a free account
-
-### Step 2: Create a New Repository
-1. Click the "+" icon in the top right → "New repository"
-2. Name it `pathmem` (or whatever you want)
-3. Make sure "Public" is selected
-4. Check "Add a README file"
-5. Click "Create repository"
-
-### Step 3: Upload the Files
-1. In your new repository, click "Add file" → "Upload files"
-2. Drag and drop ALL the files from this folder:
-   - `index.html`
-   - `manifest.json`
-   - `sw.js`
-   - `icons/` folder (with all the PNG files)
-3. Click "Commit changes"
-
-### Step 4: Enable GitHub Pages
-1. Go to your repository's "Settings" tab
-2. Scroll down to "Pages" in the left sidebar
-3. Under "Source", select "Deploy from a branch"
-4. Select "main" branch and "/ (root)" folder
-5. Click "Save"
-
-### Step 5: Access Your App
-- Your app will be live at: `https://YOUR_USERNAME.github.io/pathmem/`
-- It takes 1-2 minutes for the first deployment
-
-## Installing on Your Phone
-
-### Android (Chrome)
-1. Open the URL in Chrome
-2. Tap the three-dot menu (⋮)
-3. Tap "Add to Home screen" or "Install app"
-4. Tap "Install"
-
-### iPhone (Safari)
-1. Open the URL in Safari
-2. Tap the Share button (square with arrow)
-3. Scroll down and tap "Add to Home Screen"
-4. Tap "Add"
-
 ## How to Use
 
 ### Recording a Route
@@ -121,8 +74,7 @@ The app builds a "mesh" of your routes over time:
 
 ## License
 
-MIT - Do whatever you want with it!
+ArcadiaProducts
 
----
+Built for Walkers!
 
-Built with ❤️ for walkers who know the shortcuts
