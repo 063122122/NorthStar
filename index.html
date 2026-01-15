@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#1a1a1a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>PathMem</title>
+    <title>NorthPath</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -856,14 +856,14 @@
             <polygon points="12,6 12,12 16,14"/>
         </svg>
         <h2>Enable Location</h2>
-        <p>PathMem needs access to your location to record routes and guide you to saved places.</p>
+        <p>NorthPath needs access to your location to record routes and guide you to saved places.</p>
         <button class="permission-btn" id="grantPermission">Enable Location</button>
     </div>
 
     <!-- Main App -->
     <div class="app">
         <header class="header">
-            <div class="logo">Path<span>Mem</span></div>
+            <div class="logo">North<span>Path</span></div>
             <div class="status-indicator">
                 <div class="status-dot" id="statusDot"></div>
                 <span id="statusText">Ready</span>
@@ -1033,11 +1033,11 @@
 
     <script>
         // ============================================
-        // PathMem - Personal Route Intelligence System
+        // NorthPath - Personal Route Intelligence System
         // ============================================
 
         // Database Configuration
-        const DB_NAME = 'PathMemDB';
+        const DB_NAME = 'NorthPathDB';
         const DB_VERSION = 1;
         let db = null;
 
@@ -1275,18 +1275,20 @@
         }
 
         function updatePosition(position) {
-            const { latitude, longitude, accuracy, heading, speed } = position.coords;
+            const { latitude, longitude, accuracy, heading, speed, altitude, altitudeAccuracy } = position.coords;
             
             state.currentPosition = {
                 lat: latitude,
                 lng: longitude,
+                alt: altitude,
                 accuracy: accuracy,
+                altAccuracy: altitudeAccuracy,
                 heading: heading,
                 speed: speed,
                 timestamp: position.timestamp
             };
 
-            updateGPSStatus(accuracy);
+            updateGPSStatus(accuracy, altitude);
 
             // If recording, add point to route
             if (state.isRecording) {
@@ -1331,7 +1333,7 @@
             }
         }
 
-        function updateGPSStatus(accuracy) {
+        function updateGPSStatus(accuracy, altitude) {
             if (accuracy === null) {
                 elements.gpsAccuracy.textContent = 'GPS: No signal';
                 elements.gpsAccuracy.className = 'gps-accuracy poor';
@@ -1355,7 +1357,12 @@
                 className = 'poor';
             }
 
-            elements.gpsAccuracy.textContent = `GPS: ${status} (±${Math.round(accuracy)}m)`;
+            let altText = '';
+            if (altitude !== null && altitude !== undefined) {
+                altText = ` | Alt: ${Math.round(altitude)}m`;
+            }
+
+            elements.gpsAccuracy.textContent = `GPS: ${status} (±${Math.round(accuracy)}m)${altText}`;
             elements.gpsAccuracy.className = `gps-accuracy ${className}`;
             elements.statusDot.classList.add('active');
             elements.statusText.textContent = state.isRecording ? 'Recording' : 'Ready';
@@ -1420,19 +1427,27 @@
             // Only add if moved enough (avoid clustering)
             if (state.currentRoute.length > 0) {
                 const lastPoint = state.currentRoute[state.currentRoute.length - 1];
-                const distance = calculateDistance(
+                const horizontalDist = calculateDistance(
                     lastPoint.lat, lastPoint.lng,
                     position.lat, position.lng
                 );
                 
-                // Only add if moved at least 5 meters
-                if (distance < 5) return;
+                // Calculate vertical movement (if altitude available)
+                let verticalDist = 0;
+                if (position.alt !== null && lastPoint.alt !== null) {
+                    verticalDist = Math.abs(position.alt - lastPoint.alt);
+                }
+                
+                // Only add if moved at least 5 meters horizontally OR 2 meters vertically
+                if (horizontalDist < 5 && verticalDist < 2) return;
             }
 
             state.currentRoute.push({
                 lat: position.lat,
                 lng: position.lng,
+                alt: position.alt,
                 accuracy: position.accuracy,
+                altAccuracy: position.altAccuracy,
                 timestamp: Date.now()
             });
 
@@ -1823,6 +1838,7 @@
                 name: name,
                 lat: state.currentPosition.lat,
                 lng: state.currentPosition.lng,
+                alt: state.currentPosition.alt,
                 timestamp: Date.now()
             };
 
@@ -2020,6 +2036,11 @@
             for (const place of state.places) {
                 // Count routes that pass through this place
                 const routeCount = countRoutesForPlace(place);
+                
+                // Format altitude info
+                const altInfo = place.alt !== null && place.alt !== undefined 
+                    ? ` | ${Math.round(place.alt)}m alt` 
+                    : '';
 
                 const card = document.createElement('div');
                 card.className = 'place-card';
@@ -2033,7 +2054,7 @@
                         </div>
                         <div>
                             <div class="place-name">${escapeHtml(place.name)}</div>
-                            <div class="place-routes">${routeCount} route${routeCount !== 1 ? 's' : ''} nearby</div>
+                            <div class="place-routes">${routeCount} route${routeCount !== 1 ? 's' : ''} nearby${altInfo}</div>
                         </div>
                     </div>
                     <div class="place-actions">
@@ -2250,7 +2271,7 @@
                 // Check permissions
                 await checkPermissions();
 
-                console.log('PathMem initialized');
+                console.log('NorthPath initialized');
             } catch (e) {
                 console.error('Init failed:', e);
                 showToast('Failed to initialize app', 'error');
