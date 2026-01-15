@@ -1,6 +1,6 @@
 {
-    "name": "PathMem - Personal Route Intelligence",
-    "short_name": "PathMem",
+    "name": "NorthPath - Personal Route Intelligence",
+    "short_name": "NorthPath",
     "description": "Learn your walking routes and navigate using your personal shortcuts",
     "start_url": "./",
     "display": "standalone",
