@@ -1,5 +1,5 @@
-// PathMem Service Worker
-const CACHE_NAME = 'pathmem-v2';
+// NorthPath Service Worker
+const CACHE_NAME = 'northpath-v2';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -116,7 +116,7 @@ self.addEventListener('notificationclick', (event) => {
             .then((clientList) => {
                 // If app is already open, focus it
                 for (const client of clientList) {
-                    if (client.url.includes('pathmem') && 'focus' in client) {
+                    if (client.url.includes('northpath') && 'focus' in client) {
                         return client.focus();
                     }
                 }
