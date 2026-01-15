@@ -1173,6 +1173,8 @@
             currentPosition: null,
             deviceHeading: null,
             selectedDestination: null,
+            activeRoute: null,
+            currentWaypointIndex: 0,
             needsCompassPermission: false,
             places: [],
             routes: [],
@@ -1831,6 +1833,17 @@
             if (!place) return;
 
             state.selectedDestination = place;
+            state.activeRoute = null;
+            state.currentWaypointIndex = 0;
+
+            // Try to find a recorded route to this destination
+            const routeToUse = findBestRoute(state.currentPosition, place);
+            
+            if (routeToUse) {
+                state.activeRoute = routeToUse;
+                state.currentWaypointIndex = findNearestWaypointIndex(routeToUse.points, state.currentPosition);
+                showToast('Following recorded route', 'success');
+            }
 
             elements.noDestination.classList.add('hidden');
             elements.compass.classList.remove('hidden');
@@ -1854,20 +1867,157 @@
 
         function stopNavigation() {
             state.selectedDestination = null;
+            state.activeRoute = null;
+            state.currentWaypointIndex = 0;
             elements.destinationSelect.value = '';
             elements.noDestination.classList.remove('hidden');
             elements.compass.classList.add('hidden');
             elements.navInfo.classList.add('hidden');
         }
 
+        // Find the best recorded route from current position to destination
+        function findBestRoute(currentPos, destination) {
+            if (!currentPos || !state.routes.length) return null;
+
+            const POSITION_THRESHOLD = 50; // meters
+            const ALTITUDE_THRESHOLD = 10; // meters
+            
+            let bestRoute = null;
+            let bestScore = Infinity;
+
+            for (const route of state.routes) {
+                if (!route.points || route.points.length < 2) continue;
+
+                const startPoint = route.points[0];
+                const endPoint = route.points[route.points.length - 1];
+
+                // Check if route ends near destination
+                const endDist = calculateDistance(endPoint.lat, endPoint.lng, destination.lat, destination.lng);
+                const endAltDiff = (endPoint.alt && destination.alt) 
+                    ? Math.abs(endPoint.alt - destination.alt) 
+                    : 0;
+
+                if (endDist > POSITION_THRESHOLD || endAltDiff > ALTITUDE_THRESHOLD) {
+                    // Also check reverse (maybe they walked the route the other way)
+                    const startDist = calculateDistance(startPoint.lat, startPoint.lng, destination.lat, destination.lng);
+                    const startAltDiff = (startPoint.alt && destination.alt)
+                        ? Math.abs(startPoint.alt - destination.alt)
+                        : 0;
+                    
+                    if (startDist > POSITION_THRESHOLD || startAltDiff > ALTITUDE_THRESHOLD) {
+                        continue; // Neither end is near destination
+                    }
+                    
+                    // Reverse the route points
+                    route._reversed = true;
+                    route._points = [...route.points].reverse();
+                } else {
+                    route._reversed = false;
+                    route._points = route.points;
+                }
+
+                // Check if any point on route is near current position
+                const nearestIdx = findNearestWaypointIndex(route._points, currentPos);
+                const nearestPoint = route._points[nearestIdx];
+                const nearestDist = calculate3DDistance(
+                    nearestPoint.lat, nearestPoint.lng, nearestPoint.alt,
+                    currentPos.lat, currentPos.lng, currentPos.alt
+                );
+
+                if (nearestDist < POSITION_THRESHOLD) {
+                    // Score based on how close we are to the start of remaining route
+                    const score = nearestDist + (nearestIdx * 2); // Prefer routes where we're near the start
+                    
+                    if (score < bestScore) {
+                        bestScore = score;
+                        bestRoute = {
+                            ...route,
+                            points: route._points
+                        };
+                    }
+                }
+            }
+
+            return bestRoute;
+        }
+
+        // Find which waypoint on a route we're closest to
+        function findNearestWaypointIndex(points, currentPos) {
+            let nearestIdx = 0;
+            let nearestDist = Infinity;
+
+            for (let i = 0; i < points.length; i++) {
+                const dist = calculate3DDistance(
+                    points[i].lat, points[i].lng, points[i].alt,
+                    currentPos.lat, currentPos.lng, currentPos.alt
+                );
+                if (dist < nearestDist) {
+                    nearestDist = dist;
+                    nearestIdx = i;
+                }
+            }
+
+            return nearestIdx;
+        }
+
+        // Calculate distance considering altitude
+        function calculate3DDistance(lat1, lng1, alt1, lat2, lng2, alt2) {
+            const horizontalDist = calculateDistance(lat1, lng1, lat2, lng2);
+            const verticalDist = (alt1 !== null && alt1 !== undefined && alt2 !== null && alt2 !== undefined)
+                ? Math.abs(alt1 - alt2)
+                : 0;
+            
+            // Pythagoras for 3D distance
+            return Math.sqrt(horizontalDist * horizontalDist + verticalDist * verticalDist);
+        }
+
         function updateNavigation() {
             if (!state.selectedDestination || !state.currentPosition) return;
 
-            const dest = state.selectedDestination;
             const current = state.currentPosition;
+            let target;
+            let isFinalDestination = false;
 
-            // Calculate distance
-            const distance = calculateDistance(current.lat, current.lng, dest.lat, dest.lng);
+            // If we have an active route, navigate to waypoints
+            if (state.activeRoute && state.activeRoute.points.length > 0) {
+                const points = state.activeRoute.points;
+                
+                // Check if we've reached current waypoint
+                const currentWaypoint = points[state.currentWaypointIndex];
+                const distToWaypoint = calculate3DDistance(
+                    current.lat, current.lng, current.alt,
+                    currentWaypoint.lat, currentWaypoint.lng, currentWaypoint.alt
+                );
+
+                // If close to waypoint, advance to next
+                if (distToWaypoint < 8) { // 8 meters threshold
+                    if (state.currentWaypointIndex < points.length - 1) {
+                        state.currentWaypointIndex++;
+                        // Small vibration to indicate waypoint reached
+                        if (navigator.vibrate) {
+                            navigator.vibrate(30);
+                        }
+                    }
+                }
+
+                // Target is current waypoint
+                target = points[state.currentWaypointIndex];
+                isFinalDestination = (state.currentWaypointIndex === points.length - 1);
+                
+                // Show progress
+                const progress = Math.round((state.currentWaypointIndex / (points.length - 1)) * 100);
+                elements.navDestination.textContent = `→ ${state.selectedDestination.name} (${progress}%)`;
+            } else {
+                // No route, point directly to destination
+                target = state.selectedDestination;
+                isFinalDestination = true;
+            }
+
+            // Calculate distance to current target
+            const distance = calculate3DDistance(
+                current.lat, current.lng, current.alt,
+                target.lat, target.lng, target.alt
+            );
 
             // Update distance display
             if (distance >= 1000) {
@@ -1878,24 +2028,34 @@
                 elements.navDistanceUnit.textContent = 'm';
             }
 
-            // Calculate bearing to destination
-            const bearing = calculateBearing(current.lat, current.lng, dest.lat, dest.lng);
+            // Calculate bearing to target
+            const bearing = calculateBearing(current.lat, current.lng, target.lat, target.lng);
 
-            // Update ETA (assuming 5 km/h walking speed)
+            // Update ETA based on total remaining distance
+            let totalRemaining = distance;
+            if (state.activeRoute && state.currentWaypointIndex < state.activeRoute.points.length - 1) {
+                // Add distance of remaining waypoints
+                for (let i = state.currentWaypointIndex; i < state.activeRoute.points.length - 1; i++) {
+                    const p1 = state.activeRoute.points[i];
+                    const p2 = state.activeRoute.points[i + 1];
+                    totalRemaining += calculateDistance(p1.lat, p1.lng, p2.lat, p2.lng);
+                }
+            }
+            
             const walkingSpeed = 5; // km/h
-            const etaMinutes = (distance / 1000) / walkingSpeed * 60;
+            const etaMinutes = (totalRemaining / 1000) / walkingSpeed * 60;
             elements.navEta.textContent = `ETA: ${Math.round(etaMinutes)} min`;
 
             // Store bearing for compass update
             state.targetBearing = bearing;
             updateCompassArrow();
 
-            // Check if arrived
-            if (distance < 20) {
+            // Check if arrived at final destination
+            if (isFinalDestination && distance < 15) {
                 if (navigator.vibrate) {
                     navigator.vibrate([200, 100, 200, 100, 200]);
                 }
-                showToast(`You've arrived at ${dest.name}!`, 'success');
+                showToast(`You've arrived at ${state.selectedDestination.name}!`, 'success');
                 stopNavigation();
             }
         }
