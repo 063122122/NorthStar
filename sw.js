@@ -1,5 +1,5 @@
 // NorthPath Service Worker
-const CACHE_NAME = 'northpath-v3';
+const CACHE_NAME = 'northpath-v4';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
