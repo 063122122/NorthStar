@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -148,6 +149,17 @@
         .data-btn:hover { border-color: var(--accent); }
         .data-btn.export { background: var(--accent); color: var(--bg-primary); border-color: var(--accent); }
         .data-btn.import { border-style: dashed; }
+        .data-btn.rebuild { background: var(--blue); color: white; border-color: var(--blue); }
+        .update-warning { background: rgba(245, 158, 11, 0.1); border: 1px solid var(--warning); border-radius: 8px; padding: 12px; margin-bottom: 14px; display: flex; gap: 10px; }
+        .warning-icon { font-size: 1.2rem; }
+        .warning-content h4 { font-size: 0.8rem; color: var(--warning); margin-bottom: 6px; }
+        .warning-content p { font-size: 0.7rem; color: var(--text-secondary); line-height: 1.5; }
+        .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 400; flex-direction: column; align-items: center; justify-content: center; }
+        .loading-overlay.active { display: flex; }
+        .loading-spinner { width: 50px; height: 50px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { margin-top: 16px; font-size: 0.9rem; color: var(--text-primary); }
+        .loading-progress { margin-top: 8px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent); }
         .data-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
         .data-stat { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px; padding: 12px; text-align: center; }
         .data-stat-value { display: block; font-family: var(--font-mono); font-size: 1.2rem; font-weight: 600; color: var(--accent); }
@@ -284,6 +296,18 @@
             </div>
             <div class="view" id="dataView">
                 <div class="data-view">
+                    <div class="update-warning">
+                        <div class="warning-icon">⚠️</div>
+                        <div class="warning-content">
+                            <h4>Before Updating App</h4>
+                            <p>1. Tap <strong>Download</strong> below to save your data<br>
+                            2. Update files on GitHub<br>
+                            3. Delete app from home screen<br>
+                            4. Clear Safari cache (Settings → Safari → Clear)<br>
+                            5. Revisit site & add to home screen<br>
+                            6. Tap <strong>Upload</strong> to restore your data</p>
+                        </div>
+                    </div>
                     <div class="instruction-card"><h4>Walker Data</h4><p>Export to backup. Import to restore.</p></div>
                     <div class="data-actions">
                         <button class="data-btn export" id="exportBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Download</button>
@@ -291,1132 +315,1258 @@
                         <input type="file" id="importFile" accept=".json" style="display:none">
                     </div>
                     <div class="data-stats"><div class="data-stat"><span class="data-stat-value" id="totalRoutes">0</span><span class="data-stat-label">Routes</span></div><div class="data-stat"><span class="data-stat-value" id="totalPlaces">0</span><span class="data-stat-label">Places</span></div><div class="data-stat"><span class="data-stat-value" id="totalPoints">0</span><span class="data-stat-label">Points</span></div></div>
-                    <div class="settings-section">
-                        <div class="settings-title">Preferences</div>
-                        <div class="setting-item"><div class="setting-info"><h4>Avoid Wet Routes</h4><p>Skip slippery paths</p></div><div class="toggle" id="toggleWet"></div></div>
-                        <div class="setting-item"><div class="setting-info"><h4>Prefer Flat Routes</h4><p>Avoid stairs</p></div><div class="toggle" id="toggleFlat"></div></div>
-                        <div class="setting-item"><div class="setting-info"><h4>Learn Patterns</h4><p>Suggest frequent destinations</p></div><div class="toggle active" id="togglePatterns"></div></div>
-                    </div>
+
+```
+                <div class="settings-section">
+                    <div class="settings-title">Intelligence</div>
+                    <button class="data-btn rebuild" id="rebuildBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6M3 22v-6h6M21 12A9 9 0 006.2 6.2M3 12a9 9 0 0014.8 5.8"/></svg>Rebuild Intelligence</button>
+                    <p style="font-size:0.7rem;color:var(--text-secondary);margin-top:8px;text-align:center">Reprocess all routes to find new connections & shortcuts</p>
+                </div>
+                
+                <div class="settings-section">
+                    <div class="settings-title">Preferences</div>
+                    <div class="setting-item"><div class="setting-info"><h4>Avoid Wet Routes</h4><p>Skip slippery paths</p></div><div class="toggle" id="toggleWet"></div></div>
+                    <div class="setting-item"><div class="setting-info"><h4>Prefer Flat Routes</h4><p>Avoid stairs</p></div><div class="toggle" id="toggleFlat"></div></div>
+                    <div class="setting-item"><div class="setting-info"><h4>Learn Patterns</h4><p>Suggest frequent destinations</p></div><div class="toggle active" id="togglePatterns"></div></div>
                 </div>
             </div>
-        </main>
-    </div>
-    <div class="modal-overlay" id="saveRouteModal">
-        <div class="modal">
-            <h3 class="modal-title">Save Route</h3>
-            <input type="text" class="modal-input" id="routeNameInput" placeholder="Route name">
-            <label class="modal-label">Time Restrictions</label>
-            <div class="modal-row"><input type="time" class="modal-input" id="routeTimeStart"><input type="time" class="modal-input" id="routeTimeEnd"></div>
-            <label class="modal-label">Conditions</label>
-            <div class="modal-row"><button class="mode-btn" id="tagWet">Avoid wet</button><button class="mode-btn" id="tagDark">Avoid dark</button></div>
-            <div class="modal-buttons"><button class="modal-btn secondary" id="cancelRoute">Cancel</button><button class="modal-btn primary" id="saveRoute">Save</button></div>
         </div>
+    </main>
+</div>
+<div class="modal-overlay" id="saveRouteModal">
+    <div class="modal">
+        <h3 class="modal-title">Save Route</h3>
+        <input type="text" class="modal-input" id="routeNameInput" placeholder="Route name">
+        <label class="modal-label">Time Restrictions</label>
+        <div class="modal-row"><input type="time" class="modal-input" id="routeTimeStart"><input type="time" class="modal-input" id="routeTimeEnd"></div>
+        <label class="modal-label">Conditions</label>
+        <div class="modal-row"><button class="mode-btn" id="tagWet">Avoid wet</button><button class="mode-btn" id="tagDark">Avoid dark</button></div>
+        <div class="modal-buttons"><button class="modal-btn secondary" id="cancelRoute">Cancel</button><button class="modal-btn primary" id="saveRoute">Save</button></div>
     </div>
-    <div class="modal-overlay" id="savePlaceModal">
-        <div class="modal">
-            <h3 class="modal-title">Save Place</h3>
-            <input type="text" class="modal-input" id="placeNameInput" placeholder="Place name">
-            <label class="modal-label">Type</label>
-            <select class="modal-select" id="placeType"><option value="default">Default</option><option value="home">Home</option><option value="work">Work</option><option value="safe">Safe Place</option></select>
-            <label class="modal-label">Note</label>
-            <input type="text" class="modal-input" id="placeNote" placeholder="Optional note">
-            <div class="modal-buttons"><button class="modal-btn secondary" id="cancelPlace">Cancel</button><button class="modal-btn primary" id="savePlace">Save</button></div>
-        </div>
+</div>
+<div class="modal-overlay" id="savePlaceModal">
+    <div class="modal">
+        <h3 class="modal-title">Save Place</h3>
+        <input type="text" class="modal-input" id="placeNameInput" placeholder="Place name">
+        <label class="modal-label">Type</label>
+        <select class="modal-select" id="placeType"><option value="default">Default</option><option value="home">Home</option><option value="work">Work</option><option value="safe">Safe Place</option></select>
+        <label class="modal-label">Note</label>
+        <input type="text" class="modal-input" id="placeNote" placeholder="Optional note">
+        <div class="modal-buttons"><button class="modal-btn secondary" id="cancelPlace">Cancel</button><button class="modal-btn primary" id="savePlace">Save</button></div>
     </div>
-    <div class="modal-overlay" id="multiStopModal">
-        <div class="modal">
-            <h3 class="modal-title">Plan Trip</h3>
-            <p style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:12px">Select places in order:</p>
-            <div id="multiStopList" style="max-height:180px;overflow-y:auto"></div>
-            <div class="modal-buttons"><button class="modal-btn secondary" id="cancelMulti">Cancel</button><button class="modal-btn primary" id="startMulti">Start</button></div>
-        </div>
+</div>
+<div class="modal-overlay" id="multiStopModal">
+    <div class="modal">
+        <h3 class="modal-title">Plan Trip</h3>
+        <p style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:12px">Select places in order:</p>
+        <div id="multiStopList" style="max-height:180px;overflow-y:auto"></div>
+        <div class="modal-buttons"><button class="modal-btn secondary" id="cancelMulti">Cancel</button><button class="modal-btn primary" id="startMulti">Start</button></div>
     </div>
-    <div class="modal-overlay" id="routeDetailModal">
-        <div class="modal">
-            <h3 class="modal-title" id="routeDetailName">Route</h3>
-            <div id="routeDetailContent"></div>
-            <div class="modal-buttons"><button class="modal-btn secondary" id="closeDetail">Close</button><button class="modal-btn danger" id="deleteDetail">Delete</button></div>
-        </div>
+</div>
+<div class="modal-overlay" id="routeDetailModal">
+    <div class="modal">
+        <h3 class="modal-title" id="routeDetailName">Route</h3>
+        <div id="routeDetailContent"></div>
+        <div class="modal-buttons"><button class="modal-btn secondary" id="closeDetail">Close</button><button class="modal-btn danger" id="deleteDetail">Delete</button></div>
     </div>
-    <div class="toast" id="toast"></div>
-    <script>
-        // ============================================
-        // NorthPath v2 - Complete Navigation System
-        // ============================================
-        const DB_NAME = 'NorthPathDB';
-        const DB_VERSION = 3;
-        let db = null;
+</div>
+<div class="toast" id="toast"></div>
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Rebuilding Intelligence...</div>
+    <div class="loading-progress" id="loadingProgress">0%</div>
+</div>
+<script>
+    // ============================================
+    // NorthPath v2 - Complete Navigation System
+    // ============================================
+    const DB_NAME = 'NorthPathDB';
+    const DB_VERSION = 3;
+    let db = null;
 
-        const state = {
-            isRecording: false,
-            recordingMode: 'normal',
-            currentRoute: [],
-            recordingStartTime: null,
-            breadcrumbReturn: [],
-            watchId: null,
-            currentPosition: null,
-            deviceHeading: null,
-            lastPositions: [],
-            selectedDestination: null,
-            activeRoute: null,
-            currentWaypointIndex: 0,
-            isOffRoute: false,
-            multiStopTrip: [],
-            currentTripIndex: 0,
-            places: [],
-            routes: [],
-            segments: [],
-            routeMesh: null,
-            patterns: [],
-            needsCompassPermission: false,
-            targetBearing: null,
-            routeTags: { avoidWet: false, avoidDark: false },
-            settings: { avoidWet: false, preferFlat: false, learnPatterns: true },
-            durationInterval: null,
-            showRoutes: true,
-            showPlaces: true,
-            showLive: true
-        };
+    const state = {
+        isRecording: false,
+        recordingMode: 'normal',
+        currentRoute: [],
+        recordingStartTime: null,
+        breadcrumbReturn: [],
+        watchId: null,
+        currentPosition: null,
+        deviceHeading: null,
+        lastPositions: [],
+        selectedDestination: null,
+        activeRoute: null,
+        currentWaypointIndex: 0,
+        isOffRoute: false,
+        multiStopTrip: [],
+        currentTripIndex: 0,
+        places: [],
+        routes: [],
+        segments: [],
+        routeMesh: null,
+        patterns: [],
+        needsCompassPermission: false,
+        targetBearing: null,
+        routeTags: { avoidWet: false, avoidDark: false },
+        settings: { avoidWet: false, preferFlat: false, learnPatterns: true },
+        durationInterval: null,
+        showRoutes: true,
+        showPlaces: true,
+        showLive: true
+    };
 
-        const el = {};
+    const el = {};
 
-        function initElements() {
-            el.permissionPrompt = document.getElementById('permissionPrompt');
-            el.grantPermission = document.getElementById('grantPermission');
-            el.statusDot = document.getElementById('statusDot');
-            el.gpsAccuracy = document.getElementById('gpsAccuracy');
-            el.recordBtn = document.getElementById('recordBtn');
-            el.recordBtnText = document.getElementById('recordBtnText');
-            el.statDistance = document.getElementById('statDistance');
-            el.statDuration = document.getElementById('statDuration');
-            el.statPoints = document.getElementById('statPoints');
-            el.destinationSelect = document.getElementById('destinationSelect');
-            el.compass = document.getElementById('compass');
-            el.compassDirs = document.querySelector('.compass-dirs');
-            el.navInfo = document.getElementById('navInfo');
-            el.noDestination = document.getElementById('noDestination');
-            el.navDistanceValue = document.getElementById('navDistanceValue');
-            el.navDistanceUnit = document.getElementById('navDistanceUnit');
-            el.navDestination = document.getElementById('navDestination');
-            el.navEta = document.getElementById('navEta');
-            el.navHint = document.getElementById('navHint');
-            el.compassStatus = document.getElementById('compassStatus');
-            el.routeList = document.getElementById('routeList');
-            el.routesCount = document.getElementById('routesCount');
-            el.routesEmpty = document.getElementById('routesEmpty');
-            el.placeList = document.getElementById('placeList');
-            el.placesEmpty = document.getElementById('placesEmpty');
-            el.addPlaceBtn = document.getElementById('addPlaceBtn');
-            el.saveRouteModal = document.getElementById('saveRouteModal');
-            el.savePlaceModal = document.getElementById('savePlaceModal');
-            el.routeNameInput = document.getElementById('routeNameInput');
-            el.placeNameInput = document.getElementById('placeNameInput');
-            el.toast = document.getElementById('toast');
-            el.calibrateBtn = document.getElementById('calibrateBtn');
-            el.offRouteBanner = document.getElementById('offRouteBanner');
-            el.mapCanvas = document.getElementById('mapCanvas');
-            el.panicBtn = document.getElementById('panicBtn');
-        }
+    function initElements() {
+        el.permissionPrompt = document.getElementById('permissionPrompt');
+        el.grantPermission = document.getElementById('grantPermission');
+        el.statusDot = document.getElementById('statusDot');
+        el.gpsAccuracy = document.getElementById('gpsAccuracy');
+        el.recordBtn = document.getElementById('recordBtn');
+        el.recordBtnText = document.getElementById('recordBtnText');
+        el.statDistance = document.getElementById('statDistance');
+        el.statDuration = document.getElementById('statDuration');
+        el.statPoints = document.getElementById('statPoints');
+        el.destinationSelect = document.getElementById('destinationSelect');
+        el.compass = document.getElementById('compass');
+        el.compassDirs = document.querySelector('.compass-dirs');
+        el.navInfo = document.getElementById('navInfo');
+        el.noDestination = document.getElementById('noDestination');
+        el.navDistanceValue = document.getElementById('navDistanceValue');
+        el.navDistanceUnit = document.getElementById('navDistanceUnit');
+        el.navDestination = document.getElementById('navDestination');
+        el.navEta = document.getElementById('navEta');
+        el.navHint = document.getElementById('navHint');
+        el.compassStatus = document.getElementById('compassStatus');
+        el.routeList = document.getElementById('routeList');
+        el.routesCount = document.getElementById('routesCount');
+        el.routesEmpty = document.getElementById('routesEmpty');
+        el.placeList = document.getElementById('placeList');
+        el.placesEmpty = document.getElementById('placesEmpty');
+        el.addPlaceBtn = document.getElementById('addPlaceBtn');
+        el.saveRouteModal = document.getElementById('saveRouteModal');
+        el.savePlaceModal = document.getElementById('savePlaceModal');
+        el.routeNameInput = document.getElementById('routeNameInput');
+        el.placeNameInput = document.getElementById('placeNameInput');
+        el.toast = document.getElementById('toast');
+        el.calibrateBtn = document.getElementById('calibrateBtn');
+        el.offRouteBanner = document.getElementById('offRouteBanner');
+        el.mapCanvas = document.getElementById('mapCanvas');
+        el.panicBtn = document.getElementById('panicBtn');
+    }
 
-        // ============================================
-        // IndexedDB
-        // ============================================
-        async function initDB() {
-            return new Promise((resolve, reject) => {
-                const req = indexedDB.open(DB_NAME, DB_VERSION);
-                req.onerror = () => reject(req.error);
-                req.onsuccess = () => { db = req.result; resolve(db); };
-                req.onupgradeneeded = (e) => {
-                    const d = e.target.result;
-                    if (!d.objectStoreNames.contains('routes')) d.createObjectStore('routes', { keyPath: 'id', autoIncrement: true });
-                    if (!d.objectStoreNames.contains('places')) d.createObjectStore('places', { keyPath: 'id', autoIncrement: true });
-                    if (!d.objectStoreNames.contains('segments')) d.createObjectStore('segments', { keyPath: 'id', autoIncrement: true });
-                    if (!d.objectStoreNames.contains('patterns')) d.createObjectStore('patterns', { keyPath: 'id', autoIncrement: true });
-                    if (!d.objectStoreNames.contains('mesh')) d.createObjectStore('mesh', { keyPath: 'id' });
-                    if (!d.objectStoreNames.contains('settings')) d.createObjectStore('settings', { keyPath: 'key' });
-                };
-            });
-        }
-
-        async function dbAdd(store, data) {
-            return new Promise((res, rej) => {
-                const tx = db.transaction(store, 'readwrite');
-                const req = tx.objectStore(store).add(data);
-                req.onsuccess = () => res(req.result);
-                req.onerror = () => rej(req.error);
-            });
-        }
-
-        async function dbGetAll(store) {
-            return new Promise((res, rej) => {
-                const tx = db.transaction(store, 'readonly');
-                const req = tx.objectStore(store).getAll();
-                req.onsuccess = () => res(req.result);
-                req.onerror = () => rej(req.error);
-            });
-        }
-
-        async function dbDelete(store, id) {
-            return new Promise((res, rej) => {
-                const tx = db.transaction(store, 'readwrite');
-                const req = tx.objectStore(store).delete(id);
-                req.onsuccess = () => res();
-                req.onerror = () => rej(req.error);
-            });
-        }
-
-        async function dbPut(store, data) {
-            return new Promise((res, rej) => {
-                const tx = db.transaction(store, 'readwrite');
-                const req = tx.objectStore(store).put(data);
-                req.onsuccess = () => res(req.result);
-                req.onerror = () => rej(req.error);
-            });
-        }
-
-        async function dbGet(store, key) {
-            return new Promise((res, rej) => {
-                const tx = db.transaction(store, 'readonly');
-                const req = tx.objectStore(store).get(key);
-                req.onsuccess = () => res(req.result);
-                req.onerror = () => rej(req.error);
-            });
-        }
-
-        // ============================================
-        // Geolocation & Compass
-        // ============================================
-        async function checkPermissions() {
-            if (!navigator.geolocation) { showToast('No GPS', 'error'); return false; }
-            try {
-                const perm = await navigator.permissions.query({ name: 'geolocation' });
-                if (perm.state === 'granted') {
-                    el.permissionPrompt.classList.remove('active');
-                    startLocationWatch();
-                    return true;
-                }
-            } catch (e) {}
-            el.permissionPrompt.classList.add('active');
-            return false;
-        }
-
-        function requestLocation() {
-            navigator.geolocation.getCurrentPosition(
-                (pos) => { el.permissionPrompt.classList.remove('active'); startLocationWatch(); updatePosition(pos); },
-                (err) => showToast('Location error', 'error'),
-                { enableHighAccuracy: true }
-            );
-        }
-
-        function startLocationWatch() {
-            if (state.watchId) return;
-            state.watchId = navigator.geolocation.watchPosition(updatePosition, () => updateGPSStatus(null), { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 });
-            if (window.DeviceOrientationEvent) {
-                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    state.needsCompassPermission = true;
-                } else {
-                    window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-                    window.addEventListener('deviceorientation', handleOrientation, true);
-                }
-            }
-        }
-
-        async function requestCompassPermission() {
-            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                try {
-                    const resp = await DeviceOrientationEvent.requestPermission();
-                    if (resp === 'granted') {
-                        window.addEventListener('deviceorientation', handleOrientation, true);
-                        state.needsCompassPermission = false;
-                        el.calibrateBtn.classList.add('hidden');
-                        showToast('Compass enabled!', 'success');
-                    }
-                } catch (e) { showToast('Permission denied', 'error'); }
-            }
-        }
-
-        function updatePosition(position) {
-            const { latitude, longitude, accuracy, heading, speed, altitude, altitudeAccuracy } = position.coords;
-            const newPos = { lat: latitude, lng: longitude, alt: altitude, accuracy, altAccuracy: altitudeAccuracy, heading, speed, timestamp: position.timestamp };
-            state.lastPositions.push(newPos);
-            if (state.lastPositions.length > 10) state.lastPositions.shift();
-            state.currentPosition = newPos;
-            updateGPSStatus(accuracy, altitude);
-            if (state.isRecording) {
-                addRoutePoint(newPos);
-                if (state.recordingMode === 'breadcrumb') state.breadcrumbReturn = [...state.currentRoute];
-            }
-            if (state.selectedDestination) updateNavigation();
-            if (state.settings.learnPatterns) checkPatterns();
-        }
-
-        function handleOrientation(event) {
-            let h = null;
-            if (event.webkitCompassHeading !== undefined) h = event.webkitCompassHeading;
-            else if (event.alpha !== null) h = (360 - event.alpha) % 360;
-            if (h !== null && !isNaN(h)) {
-                state.deviceHeading = h;
-                if (el.compassStatus) { el.compassStatus.textContent = `Compass: ${Math.round(h)}°`; el.compassStatus.classList.add('active'); }
-                if (state.selectedDestination) updateCompassArrow();
-            }
-        }
-
-        function updateGPSStatus(accuracy, altitude) {
-            if (accuracy === null) {
-                el.gpsAccuracy.textContent = 'GPS: No signal';
-                el.gpsAccuracy.className = 'gps-accuracy poor';
-                el.statusDot.classList.remove('active');
-                return;
-            }
-            let status, cls;
-            if (accuracy < 10) { status = 'Excellent'; cls = 'good'; }
-            else if (accuracy < 30) { status = 'Good'; cls = 'good'; }
-            else if (accuracy < 100) { status = 'Fair'; cls = 'medium'; }
-            else { status = 'Poor'; cls = 'poor'; }
-            const alt = (altitude != null) ? ` | ${Math.round(altitude)}m` : '';
-            el.gpsAccuracy.textContent = `GPS: ${status} (±${Math.round(accuracy)}m)${alt}`;
-            el.gpsAccuracy.className = `gps-accuracy ${cls}`;
-            el.statusDot.classList.add('active');
-        }
-
-        // ============================================
-        // Recording
-        // ============================================
-        function startRecording() {
-            if (!state.currentPosition) { showToast('Waiting for GPS...', 'error'); return; }
-            state.isRecording = true;
-            state.currentRoute = [];
-            state.recordingStartTime = Date.now();
-            if (state.recordingMode === 'breadcrumb') state.breadcrumbReturn = [];
-            addRoutePoint(state.currentPosition);
-            el.recordBtn.classList.add('recording');
-            el.recordBtnText.textContent = 'Stop';
-            if (navigator.vibrate) navigator.vibrate(100);
-            state.durationInterval = setInterval(updateRecordingStats, 1000);
-        }
-
-        function stopRecording() {
-            state.isRecording = false;
-            clearInterval(state.durationInterval);
-            el.recordBtn.classList.remove('recording');
-            el.recordBtnText.textContent = 'Start';
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-            if (state.currentRoute.length < 3) { showToast('Route too short', 'error'); resetRecordingStats(); return; }
-            if (state.recordingMode === 'explore') {
-                autoMergeRoute(state.currentRoute);
-                showToast('Segments merged', 'success');
-                resetRecordingStats();
-            } else if (state.recordingMode === 'breadcrumb') {
-                showToast('Breadcrumb cleared', 'success');
-                resetRecordingStats();
-            } else {
-                el.saveRouteModal.classList.add('active');
-                el.routeNameInput.value = '';
-                el.routeNameInput.focus();
-                state.routeTags = { avoidWet: false, avoidDark: false };
-            }
-        }
-
-        function addRoutePoint(pos) {
-            if (state.currentRoute.length > 0) {
-                const last = state.currentRoute[state.currentRoute.length - 1];
-                const hD = calculateDistance(last.lat, last.lng, pos.lat, pos.lng);
-                const vD = (pos.alt && last.alt) ? Math.abs(pos.alt - last.alt) : 0;
-                if (hD < 3 && vD < 1.5) return;
-            }
-            const point = { lat: pos.lat, lng: pos.lng, alt: pos.alt, accuracy: pos.accuracy, timestamp: Date.now() };
-            if (state.currentRoute.length > 0) {
-                const last = state.currentRoute[state.currentRoute.length - 1];
-                if (pos.alt && last.alt) {
-                    const altChange = Math.abs(pos.alt - last.alt);
-                    const timeDiff = (Date.now() - last.timestamp) / 1000;
-                    if (altChange > 2 && timeDiff < 30) point.isStairs = true;
-                }
-            }
-            state.currentRoute.push(point);
-            updateRecordingStats();
-        }
-
-        function updateRecordingStats() {
-            const dist = calculateRouteDistance(state.currentRoute);
-            el.statDistance.textContent = (dist / 1000).toFixed(2);
-            if (state.recordingStartTime) {
-                const dur = Date.now() - state.recordingStartTime;
-                el.statDuration.textContent = formatDuration(dur);
-            }
-            el.statPoints.textContent = state.currentRoute.length;
-        }
-
-        function resetRecordingStats() {
-            state.currentRoute = [];
-            state.recordingStartTime = null;
-            el.statDistance.textContent = '0.0';
-            el.statDuration.textContent = '0:00';
-            el.statPoints.textContent = '0';
-        }
-
-        async function saveRoute(name) {
-            const route = {
-                name,
-                points: state.currentRoute,
-                distance: calculateRouteDistance(state.currentRoute),
-                duration: Date.now() - state.recordingStartTime,
-                timestamp: Date.now(),
-                startPoint: state.currentRoute[0],
-                endPoint: state.currentRoute[state.currentRoute.length - 1],
-                walkCount: 1,
-                avgTime: Date.now() - state.recordingStartTime,
-                hasStairs: state.currentRoute.some(p => p.isStairs),
-                tags: { ...state.routeTags },
-                confidence: 1
+    // ============================================
+    // IndexedDB
+    // ============================================
+    async function initDB() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(DB_NAME, DB_VERSION);
+            req.onerror = () => reject(req.error);
+            req.onsuccess = () => { db = req.result; resolve(db); };
+            req.onupgradeneeded = (e) => {
+                const d = e.target.result;
+                if (!d.objectStoreNames.contains('routes')) d.createObjectStore('routes', { keyPath: 'id', autoIncrement: true });
+                if (!d.objectStoreNames.contains('places')) d.createObjectStore('places', { keyPath: 'id', autoIncrement: true });
+                if (!d.objectStoreNames.contains('segments')) d.createObjectStore('segments', { keyPath: 'id', autoIncrement: true });
+                if (!d.objectStoreNames.contains('patterns')) d.createObjectStore('patterns', { keyPath: 'id', autoIncrement: true });
+                if (!d.objectStoreNames.contains('mesh')) d.createObjectStore('mesh', { keyPath: 'id' });
+                if (!d.objectStoreNames.contains('settings')) d.createObjectStore('settings', { keyPath: 'key' });
             };
-            const ts = document.getElementById('routeTimeStart').value;
-            const te = document.getElementById('routeTimeEnd').value;
-            if (ts) route.tags.timeStart = ts;
-            if (te) route.tags.timeEnd = te;
-            try {
-                const id = await dbAdd('routes', route);
-                route.id = id;
-                state.routes.push(route);
-                await extractSegments(route);
-                await updateRouteMesh(route);
-                showToast(`Route "${name}" saved!`, 'success');
-                renderRoutes();
-                updateDestinationDropdown();
-                updateDataStats();
-            } catch (e) { showToast('Failed to save', 'error'); }
-            resetRecordingStats();
-            el.saveRouteModal.classList.remove('active');
-        }
+        });
+    }
 
-        // ============================================
-        // Segments & Mesh
-        // ============================================
-        async function extractSegments(route) {
-            const threshold = 30;
-            for (const existing of state.routes) {
-                if (existing.id === route.id) continue;
-                const ints = findAllIntersections(route.points, existing.points, threshold);
-                for (const int of ints) {
-                    const seg = { points: int.segmentPoints, fromRouteId: route.id, distance: calculateRouteDistance(int.segmentPoints), timestamp: Date.now() };
-                    await dbAdd('segments', seg);
-                    state.segments.push(seg);
-                }
+    async function dbAdd(store, data) {
+        return new Promise((res, rej) => {
+            const tx = db.transaction(store, 'readwrite');
+            const req = tx.objectStore(store).add(data);
+            req.onsuccess = () => res(req.result);
+            req.onerror = () => rej(req.error);
+        });
+    }
+
+    async function dbGetAll(store) {
+        return new Promise((res, rej) => {
+            const tx = db.transaction(store, 'readonly');
+            const req = tx.objectStore(store).getAll();
+            req.onsuccess = () => res(req.result);
+            req.onerror = () => rej(req.error);
+        });
+    }
+
+    async function dbDelete(store, id) {
+        return new Promise((res, rej) => {
+            const tx = db.transaction(store, 'readwrite');
+            const req = tx.objectStore(store).delete(id);
+            req.onsuccess = () => res();
+            req.onerror = () => rej(req.error);
+        });
+    }
+
+    async function dbPut(store, data) {
+        return new Promise((res, rej) => {
+            const tx = db.transaction(store, 'readwrite');
+            const req = tx.objectStore(store).put(data);
+            req.onsuccess = () => res(req.result);
+            req.onerror = () => rej(req.error);
+        });
+    }
+
+    async function dbGet(store, key) {
+        return new Promise((res, rej) => {
+            const tx = db.transaction(store, 'readonly');
+            const req = tx.objectStore(store).get(key);
+            req.onsuccess = () => res(req.result);
+            req.onerror = () => rej(req.error);
+        });
+    }
+
+    // ============================================
+    // Geolocation & Compass
+    // ============================================
+    async function checkPermissions() {
+        if (!navigator.geolocation) { showToast('No GPS', 'error'); return false; }
+        try {
+            const perm = await navigator.permissions.query({ name: 'geolocation' });
+            if (perm.state === 'granted') {
+                el.permissionPrompt.classList.remove('active');
+                startLocationWatch();
+                return true;
+            }
+        } catch (e) {}
+        el.permissionPrompt.classList.add('active');
+        return false;
+    }
+
+    function requestLocation() {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => { el.permissionPrompt.classList.remove('active'); startLocationWatch(); updatePosition(pos); },
+            (err) => showToast('Location error', 'error'),
+            { enableHighAccuracy: true }
+        );
+    }
+
+    function startLocationWatch() {
+        if (state.watchId) return;
+        state.watchId = navigator.geolocation.watchPosition(updatePosition, () => updateGPSStatus(null), { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 });
+        if (window.DeviceOrientationEvent) {
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                state.needsCompassPermission = true;
+            } else {
+                window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+                window.addEventListener('deviceorientation', handleOrientation, true);
             }
         }
+    }
 
-        function findAllIntersections(pts1, pts2, threshold) {
-            const ints = [];
-            for (let i = 0; i < pts1.length; i++) {
-                for (let j = 0; j < pts2.length; j++) {
-                    const dist = calculate3DDistance(pts1[i].lat, pts1[i].lng, pts1[i].alt, pts2[j].lat, pts2[j].lng, pts2[j].alt);
-                    if (dist < threshold) {
-                        const isNew = !ints.some(x => Math.abs(x.i1 - i) < 5 && Math.abs(x.i2 - j) < 5);
-                        if (isNew) {
-                            ints.push({
-                                i1: i, i2: j,
-                                point: { lat: (pts1[i].lat + pts2[j].lat) / 2, lng: (pts1[i].lng + pts2[j].lng) / 2, alt: (pts1[i].alt && pts2[j].alt) ? (pts1[i].alt + pts2[j].alt) / 2 : null },
-                                segmentPoints: pts1.slice(Math.max(0, i - 3), Math.min(pts1.length, i + 3))
-                            });
-                        }
+    async function requestCompassPermission() {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            try {
+                const resp = await DeviceOrientationEvent.requestPermission();
+                if (resp === 'granted') {
+                    window.addEventListener('deviceorientation', handleOrientation, true);
+                    state.needsCompassPermission = false;
+                    el.calibrateBtn.classList.add('hidden');
+                    showToast('Compass enabled!', 'success');
+                }
+            } catch (e) { showToast('Permission denied', 'error'); }
+        }
+    }
+
+    function updatePosition(position) {
+        const { latitude, longitude, accuracy, heading, speed, altitude, altitudeAccuracy } = position.coords;
+        const newPos = { lat: latitude, lng: longitude, alt: altitude, accuracy, altAccuracy: altitudeAccuracy, heading, speed, timestamp: position.timestamp };
+        state.lastPositions.push(newPos);
+        if (state.lastPositions.length > 10) state.lastPositions.shift();
+        state.currentPosition = newPos;
+        updateGPSStatus(accuracy, altitude);
+        if (state.isRecording) {
+            addRoutePoint(newPos);
+            if (state.recordingMode === 'breadcrumb') state.breadcrumbReturn = [...state.currentRoute];
+        }
+        if (state.selectedDestination) updateNavigation();
+        if (state.settings.learnPatterns) checkPatterns();
+    }
+
+    function handleOrientation(event) {
+        let h = null;
+        if (event.webkitCompassHeading !== undefined) h = event.webkitCompassHeading;
+        else if (event.alpha !== null) h = (360 - event.alpha) % 360;
+        if (h !== null && !isNaN(h)) {
+            state.deviceHeading = h;
+            if (el.compassStatus) { el.compassStatus.textContent = `Compass: ${Math.round(h)}°`; el.compassStatus.classList.add('active'); }
+            if (state.selectedDestination) updateCompassArrow();
+        }
+    }
+
+    function updateGPSStatus(accuracy, altitude) {
+        if (accuracy === null) {
+            el.gpsAccuracy.textContent = 'GPS: No signal';
+            el.gpsAccuracy.className = 'gps-accuracy poor';
+            el.statusDot.classList.remove('active');
+            return;
+        }
+        let status, cls;
+        if (accuracy < 10) { status = 'Excellent'; cls = 'good'; }
+        else if (accuracy < 30) { status = 'Good'; cls = 'good'; }
+        else if (accuracy < 100) { status = 'Fair'; cls = 'medium'; }
+        else { status = 'Poor'; cls = 'poor'; }
+        const alt = (altitude != null) ? ` | ${Math.round(altitude)}m` : '';
+        el.gpsAccuracy.textContent = `GPS: ${status} (±${Math.round(accuracy)}m)${alt}`;
+        el.gpsAccuracy.className = `gps-accuracy ${cls}`;
+        el.statusDot.classList.add('active');
+    }
+
+    // ============================================
+    // Recording
+    // ============================================
+    function startRecording() {
+        if (!state.currentPosition) { showToast('Waiting for GPS...', 'error'); return; }
+        state.isRecording = true;
+        state.currentRoute = [];
+        state.recordingStartTime = Date.now();
+        if (state.recordingMode === 'breadcrumb') state.breadcrumbReturn = [];
+        addRoutePoint(state.currentPosition);
+        el.recordBtn.classList.add('recording');
+        el.recordBtnText.textContent = 'Stop';
+        if (navigator.vibrate) navigator.vibrate(100);
+        state.durationInterval = setInterval(updateRecordingStats, 1000);
+    }
+
+    function stopRecording() {
+        state.isRecording = false;
+        clearInterval(state.durationInterval);
+        el.recordBtn.classList.remove('recording');
+        el.recordBtnText.textContent = 'Start';
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        if (state.currentRoute.length < 3) { showToast('Route too short', 'error'); resetRecordingStats(); return; }
+        if (state.recordingMode === 'explore') {
+            autoMergeRoute(state.currentRoute);
+            showToast('Segments merged', 'success');
+            resetRecordingStats();
+        } else if (state.recordingMode === 'breadcrumb') {
+            // Auto-save breadcrumb to feed the algorithm
+            const now = new Date();
+            const name = `Breadcrumb ${now.toLocaleDateString('en-GB', {day:'numeric',month:'short'})} ${now.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'})}`;
+            saveBreadcrumbRoute(name);
+        } else {
+            el.saveRouteModal.classList.add('active');
+            el.routeNameInput.value = '';
+            el.routeNameInput.focus();
+            state.routeTags = { avoidWet: false, avoidDark: false };
+        }
+    }
+
+    function addRoutePoint(pos) {
+        if (state.currentRoute.length > 0) {
+            const last = state.currentRoute[state.currentRoute.length - 1];
+            const hD = calculateDistance(last.lat, last.lng, pos.lat, pos.lng);
+            const vD = (pos.alt && last.alt) ? Math.abs(pos.alt - last.alt) : 0;
+            if (hD < 3 && vD < 1.5) return;
+        }
+        const point = { lat: pos.lat, lng: pos.lng, alt: pos.alt, accuracy: pos.accuracy, timestamp: Date.now() };
+        if (state.currentRoute.length > 0) {
+            const last = state.currentRoute[state.currentRoute.length - 1];
+            if (pos.alt && last.alt) {
+                const altChange = Math.abs(pos.alt - last.alt);
+                const timeDiff = (Date.now() - last.timestamp) / 1000;
+                if (altChange > 2 && timeDiff < 30) point.isStairs = true;
+            }
+        }
+        state.currentRoute.push(point);
+        updateRecordingStats();
+    }
+
+    function updateRecordingStats() {
+        const dist = calculateRouteDistance(state.currentRoute);
+        el.statDistance.textContent = (dist / 1000).toFixed(2);
+        if (state.recordingStartTime) {
+            const dur = Date.now() - state.recordingStartTime;
+            el.statDuration.textContent = formatDuration(dur);
+        }
+        el.statPoints.textContent = state.currentRoute.length;
+    }
+
+    function resetRecordingStats() {
+        state.currentRoute = [];
+        state.recordingStartTime = null;
+        el.statDistance.textContent = '0.0';
+        el.statDuration.textContent = '0:00';
+        el.statPoints.textContent = '0';
+    }
+
+    async function saveRoute(name) {
+        const route = {
+            name,
+            points: state.currentRoute,
+            distance: calculateRouteDistance(state.currentRoute),
+            duration: Date.now() - state.recordingStartTime,
+            timestamp: Date.now(),
+            startPoint: state.currentRoute[0],
+            endPoint: state.currentRoute[state.currentRoute.length - 1],
+            walkCount: 1,
+            avgTime: Date.now() - state.recordingStartTime,
+            hasStairs: state.currentRoute.some(p => p.isStairs),
+            tags: { ...state.routeTags },
+            confidence: 1
+        };
+        const ts = document.getElementById('routeTimeStart').value;
+        const te = document.getElementById('routeTimeEnd').value;
+        if (ts) route.tags.timeStart = ts;
+        if (te) route.tags.timeEnd = te;
+        try {
+            const id = await dbAdd('routes', route);
+            route.id = id;
+            state.routes.push(route);
+            await extractSegments(route);
+            await updateRouteMesh(route);
+            showToast(`Route "${name}" saved!`, 'success');
+            renderRoutes();
+            updateDestinationDropdown();
+            updateDataStats();
+        } catch (e) { showToast('Failed to save', 'error'); }
+        resetRecordingStats();
+        el.saveRouteModal.classList.remove('active');
+    }
+
+    async function saveBreadcrumbRoute(name) {
+        const route = {
+            name,
+            points: state.currentRoute,
+            distance: calculateRouteDistance(state.currentRoute),
+            duration: Date.now() - state.recordingStartTime,
+            timestamp: Date.now(),
+            startPoint: state.currentRoute[0],
+            endPoint: state.currentRoute[state.currentRoute.length - 1],
+            walkCount: 1,
+            avgTime: Date.now() - state.recordingStartTime,
+            hasStairs: state.currentRoute.some(p => p.isStairs),
+            tags: { isBreadcrumb: true },
+            confidence: 1
+        };
+        try {
+            const id = await dbAdd('routes', route);
+            route.id = id;
+            state.routes.push(route);
+            await extractSegments(route);
+            await updateRouteMesh(route);
+            showToast('Breadcrumb saved & learned', 'success');
+            renderRoutes();
+            updateDestinationDropdown();
+            updateDataStats();
+        } catch (e) { showToast('Failed to save', 'error'); }
+        resetRecordingStats();
+    }
+
+    // ============================================
+    // Segments & Mesh
+    // ============================================
+    async function extractSegments(route) {
+        const threshold = 30;
+        for (const existing of state.routes) {
+            if (existing.id === route.id) continue;
+            const ints = findAllIntersections(route.points, existing.points, threshold);
+            for (const int of ints) {
+                const seg = { points: int.segmentPoints, fromRouteId: route.id, distance: calculateRouteDistance(int.segmentPoints), timestamp: Date.now() };
+                await dbAdd('segments', seg);
+                state.segments.push(seg);
+            }
+        }
+    }
+
+    function findAllIntersections(pts1, pts2, threshold) {
+        const ints = [];
+        for (let i = 0; i < pts1.length; i++) {
+            for (let j = 0; j < pts2.length; j++) {
+                const dist = calculate3DDistance(pts1[i].lat, pts1[i].lng, pts1[i].alt, pts2[j].lat, pts2[j].lng, pts2[j].alt);
+                if (dist < threshold) {
+                    const isNew = !ints.some(x => Math.abs(x.i1 - i) < 5 && Math.abs(x.i2 - j) < 5);
+                    if (isNew) {
+                        ints.push({
+                            i1: i, i2: j,
+                            point: { lat: (pts1[i].lat + pts2[j].lat) / 2, lng: (pts1[i].lng + pts2[j].lng) / 2, alt: (pts1[i].alt && pts2[j].alt) ? (pts1[i].alt + pts2[j].alt) / 2 : null },
+                            segmentPoints: pts1.slice(Math.max(0, i - 3), Math.min(pts1.length, i + 3))
+                        });
                     }
                 }
             }
-            return ints;
         }
+        return ints;
+    }
 
-        function autoMergeRoute(newPts) {
-            for (const route of state.routes) {
-                const ints = findAllIntersections(newPts, route.points, 25);
-                if (ints.length > 0) updateRouteMesh({ points: newPts, id: 'explore_' + Date.now() });
-            }
+    function autoMergeRoute(newPts) {
+        for (const route of state.routes) {
+            const ints = findAllIntersections(newPts, route.points, 25);
+            if (ints.length > 0) updateRouteMesh({ points: newPts, id: 'explore_' + Date.now() });
         }
+    }
 
-        async function updateRouteMesh(route) {
-            let mesh = state.routeMesh || { nodes: [], edges: [] };
-            const start = findOrCreateNode(mesh, route.startPoint || route.points[0]);
-            const end = findOrCreateNode(mesh, route.endPoint || route.points[route.points.length - 1]);
-            for (const existing of state.routes) {
-                if (existing.id === route.id) continue;
-                const ints = findAllIntersections(route.points, existing.points, 25);
-                for (const int of ints) findOrCreateNode(mesh, int.point);
-            }
-            const nodes = getNodesAlongRoute(mesh, route);
-            for (let i = 0; i < nodes.length - 1; i++) {
-                const exists = mesh.edges.find(e => (e.from === nodes[i].id && e.to === nodes[i + 1].id) || (e.from === nodes[i + 1].id && e.to === nodes[i].id));
-                if (!exists) {
-                    mesh.edges.push({ from: nodes[i].id, to: nodes[i + 1].id, distance: calculateDistance(nodes[i].lat, nodes[i].lng, nodes[i + 1].lat, nodes[i + 1].lng), routeId: route.id, hasStairs: route.hasStairs });
-                }
-            }
-            state.routeMesh = mesh;
-            await dbPut('mesh', { id: 'main', ...mesh });
-        }
-
-        function findOrCreateNode(mesh, pt, threshold = 25) {
-            for (const n of mesh.nodes) {
-                if (calculateDistance(n.lat, n.lng, pt.lat, pt.lng) < threshold) return n;
-            }
-            const node = { id: `n_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`, lat: pt.lat, lng: pt.lng, alt: pt.alt };
-            mesh.nodes.push(node);
-            return node;
-        }
-
-        function getNodesAlongRoute(mesh, route) {
-            const nodes = [];
-            const pts = route.points || [];
-            for (const pt of pts) {
-                const near = mesh.nodes.find(n => !nodes.includes(n) && calculateDistance(n.lat, n.lng, pt.lat, pt.lng) < 25);
-                if (near) nodes.push(near);
-            }
-            return nodes;
-        }
-
-        // ============================================
-        // Navigation
-        // ============================================
-        function startNavigation(placeId) {
-            const place = state.places.find(p => p.id === placeId);
-            if (!place) return;
-            state.selectedDestination = place;
-            state.activeRoute = null;
-            state.currentWaypointIndex = 0;
-            state.isOffRoute = false;
-            const route = findBestRoute(state.currentPosition, place);
-            if (route) {
-                state.activeRoute = route;
-                state.currentWaypointIndex = findNearestWaypointIndex(route.points, state.currentPosition);
-                showToast('Following route', 'success');
-            } else {
-                showToast('No route - direct', 'warning');
-            }
-            el.noDestination.classList.add('hidden');
-            el.compass.classList.remove('hidden');
-            el.navInfo.classList.remove('hidden');
-            el.offRouteBanner.classList.add('hidden');
-            el.navDestination.textContent = `→ ${place.name}`;
-            if (state.needsCompassPermission) el.calibrateBtn.classList.remove('hidden');
-            else el.calibrateBtn.classList.add('hidden');
-            if (navigator.vibrate) navigator.vibrate(50);
-            updateNavigation();
-            learnPattern(placeId);
-        }
-
-        function stopNavigation() {
-            state.selectedDestination = null;
-            state.activeRoute = null;
-            state.currentWaypointIndex = 0;
-            state.isOffRoute = false;
-            el.destinationSelect.value = '';
-            el.noDestination.classList.remove('hidden');
-            el.compass.classList.add('hidden');
-            el.navInfo.classList.add('hidden');
-            el.offRouteBanner.classList.add('hidden');
-        }
-
-        function findBestRoute(currentPos, dest) {
-            if (!currentPos || !state.routes.length) return null;
-            const threshold = 50;
-            const now = new Date();
-            const mins = now.getHours() * 60 + now.getMinutes();
-            let best = null, bestScore = Infinity;
+    async function rebuildIntelligence() {
+        if (state.routes.length === 0) { showToast('No routes to process', 'error'); return; }
+        
+        const overlay = document.getElementById('loadingOverlay');
+        const progress = document.getElementById('loadingProgress');
+        overlay.classList.add('active');
+        
+        try {
+            // Reset mesh completely
+            state.routeMesh = { nodes: [], edges: [] };
+            state.segments = [];
+            
+            // Clear existing segments from DB
+            const existingSegs = await dbGetAll('segments');
+            for (const seg of existingSegs) await dbDelete('segments', seg.id);
+            
+            const total = state.routes.length;
+            let processed = 0;
+            
+            // Process each route
             for (const route of state.routes) {
                 if (!route.points || route.points.length < 2) continue;
-                if (route.tags?.timeStart && route.tags?.timeEnd) {
-                    const [sh, sm] = route.tags.timeStart.split(':').map(Number);
-                    const [eh, em] = route.tags.timeEnd.split(':').map(Number);
-                    if (mins < sh * 60 + sm || mins > eh * 60 + em) continue;
-                }
-                if (state.settings.avoidWet && route.tags?.avoidWet) continue;
-                if (state.settings.preferFlat && route.hasStairs) continue;
-                const start = route.points[0], end = route.points[route.points.length - 1];
-                let reversed = false;
-                let endDist = calculate3DDistance(end.lat, end.lng, end.alt, dest.lat, dest.lng, dest.alt);
-                if (endDist > threshold) {
-                    const startDist = calculate3DDistance(start.lat, start.lng, start.alt, dest.lat, dest.lng, dest.alt);
-                    if (startDist > threshold) continue;
-                    reversed = true;
-                }
-                const pts = reversed ? [...route.points].reverse() : route.points;
-                const nearIdx = findNearestWaypointIndex(pts, currentPos);
-                const nearPt = pts[nearIdx];
-                const nearDist = calculate3DDistance(nearPt.lat, nearPt.lng, nearPt.alt, currentPos.lat, currentPos.lng, currentPos.alt);
-                if (nearDist < threshold) {
-                    const score = nearDist + nearIdx * 2 - (route.confidence || 1) * 10 - (route.walkCount || 1) * 5;
-                    if (score < bestScore) { bestScore = score; best = { ...route, points: pts }; }
-                }
-            }
-            if (!best && state.routeMesh) best = findMeshRoute(currentPos, dest);
-            return best;
-        }
-
-        function findMeshRoute(currentPos, dest) {
-            if (!state.routeMesh?.nodes?.length) return null;
-            const startN = findClosestNode(state.routeMesh, currentPos);
-            const endN = findClosestNode(state.routeMesh, dest);
-            if (!startN || !endN) return null;
-            const dist = {}, prev = {}, unvisited = new Set();
-            for (const n of state.routeMesh.nodes) { dist[n.id] = Infinity; prev[n.id] = null; unvisited.add(n.id); }
-            dist[startN.id] = 0;
-            while (unvisited.size > 0) {
-                let cur = null, minD = Infinity;
-                for (const id of unvisited) if (dist[id] < minD) { minD = dist[id]; cur = id; }
-                if (cur === null || cur === endN.id) break;
-                unvisited.delete(cur);
-                const neighbors = state.routeMesh.edges.filter(e => e.from === cur || e.to === cur);
-                for (const edge of neighbors) {
-                    const nid = edge.from === cur ? edge.to : edge.from;
-                    if (!unvisited.has(nid)) continue;
-                    let cost = edge.distance;
-                    if (state.settings.preferFlat && edge.hasStairs) cost += 1000;
-                    const newD = dist[cur] + cost;
-                    if (newD < dist[nid]) { dist[nid] = newD; prev[nid] = cur; }
-                }
-            }
-            const path = [];
-            let c = endN.id;
-            while (c) { const n = state.routeMesh.nodes.find(x => x.id === c); if (n) path.unshift(n); c = prev[c]; }
-            return path.length > 1 ? { points: path, isMesh: true, name: 'Combined' } : null;
-        }
-
-        function findClosestNode(mesh, pos) {
-            let closest = null, minD = Infinity;
-            for (const n of mesh.nodes) {
-                const d = calculateDistance(n.lat, n.lng, pos.lat, pos.lng);
-                if (d < minD) { minD = d; closest = n; }
-            }
-            return minD < 100 ? closest : null;
-        }
-
-        function findNearestWaypointIndex(pts, pos) {
-            let idx = 0, minD = Infinity;
-            for (let i = 0; i < pts.length; i++) {
-                const d = calculate3DDistance(pts[i].lat, pts[i].lng, pts[i].alt, pos.lat, pos.lng, pos.alt);
-                if (d < minD) { minD = d; idx = i; }
-            }
-            return idx;
-        }
-
-        function updateNavigation() {
-            if (!state.selectedDestination || !state.currentPosition) return;
-            const cur = state.currentPosition;
-            let target, isFinal = false;
-            if (state.activeRoute?.points?.length > 0) {
-                const pts = state.activeRoute.points;
-                const wp = pts[state.currentWaypointIndex];
-                const distWp = calculate3DDistance(cur.lat, cur.lng, cur.alt, wp.lat, wp.lng, wp.alt);
-                const off = distWp > 50;
-                if (off && !state.isOffRoute) { state.isOffRoute = true; el.offRouteBanner.classList.remove('hidden'); if (navigator.vibrate) navigator.vibrate([100, 100, 100]); }
-                else if (!off && state.isOffRoute) { state.isOffRoute = false; el.offRouteBanner.classList.add('hidden'); }
-                if (distWp < 8 && state.currentWaypointIndex < pts.length - 1) { state.currentWaypointIndex++; if (navigator.vibrate) navigator.vibrate(30); }
-                target = pts[state.currentWaypointIndex];
-                isFinal = state.currentWaypointIndex === pts.length - 1;
-                const prog = Math.round((state.currentWaypointIndex / (pts.length - 1)) * 100);
-                el.navDestination.textContent = `→ ${state.selectedDestination.name} (${prog}%)`;
-            } else {
-                target = state.selectedDestination;
-                isFinal = true;
-            }
-            const dist = calculate3DDistance(cur.lat, cur.lng, cur.alt, target.lat, target.lng, target.alt);
-            if (dist >= 1000) { el.navDistanceValue.textContent = (dist / 1000).toFixed(1); el.navDistanceUnit.textContent = 'km'; }
-            else { el.navDistanceValue.textContent = Math.round(dist); el.navDistanceUnit.textContent = 'm'; }
-            const bearing = calculateBearing(cur.lat, cur.lng, target.lat, target.lng);
-            let total = dist;
-            if (state.activeRoute && state.currentWaypointIndex < state.activeRoute.points.length - 1) {
-                for (let i = state.currentWaypointIndex; i < state.activeRoute.points.length - 1; i++) {
-                    const p1 = state.activeRoute.points[i], p2 = state.activeRoute.points[i + 1];
-                    total += calculateDistance(p1.lat, p1.lng, p2.lat, p2.lng);
-                }
-            }
-            el.navEta.textContent = `ETA: ${Math.round((total / 1000) / 5 * 60)} min`;
-            state.targetBearing = bearing;
-            updateCompassArrow();
-            if (isFinal && dist < 15) {
-                if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
-                showToast(`Arrived at ${state.selectedDestination.name}!`, 'success');
-                if (state.multiStopTrip.length > 0 && state.currentTripIndex < state.multiStopTrip.length - 1) {
-                    state.currentTripIndex++;
-                    startNavigation(state.multiStopTrip[state.currentTripIndex]);
-                } else stopNavigation();
-            }
-        }
-
-        function updateCompassArrow() {
-            if (!state.targetBearing) return;
-            let rot = state.targetBearing;
-            if (state.deviceHeading !== null) rot = state.targetBearing - state.deviceHeading;
-            let norm = ((rot % 360) + 360) % 360;
-            if (norm > 180) norm -= 360;
-            const abs = Math.abs(norm);
-            if (el.navHint) {
-                if (abs < 15) { el.navHint.innerHTML = '<strong>✓ On track!</strong>'; el.navHint.style.borderColor = 'var(--accent)'; }
-                else if (abs < 45) { el.navHint.innerHTML = `<strong>Almost!</strong> Turn slightly ${norm > 0 ? 'right' : 'left'}`; el.navHint.style.borderColor = 'var(--warning)'; }
-                else if (abs < 135) { el.navHint.innerHTML = `<strong>Turn ${norm > 0 ? 'right' : 'left'}</strong>`; el.navHint.style.borderColor = ''; }
-                else { el.navHint.innerHTML = '<strong>Turn around</strong>'; el.navHint.style.borderColor = ''; }
-            }
-            const ringRot = (((-rot) % 360) + 360) % 360;
-            if (el.compassDirs) el.compassDirs.style.transform = `rotate(${ringRot}deg)`;
-        }
-
-        // ============================================
-        // Panic / Home / Nearest
-        // ============================================
-        function panicGetHome() {
-            let home = state.places.find(p => p.type === 'home') || state.places.find(p => p.type === 'safe') || findNearestPlace();
-            if (home) {
-                showToast('Heading home...', 'success');
-                el.destinationSelect.value = home.id;
-                startNavigation(home.id);
-                document.querySelector('[data-view="navigate"]').click();
-            } else showToast('No home saved', 'error');
-        }
-
-        function findNearestPlace() {
-            if (!state.currentPosition || !state.places.length) return null;
-            let nearest = null, minD = Infinity;
-            for (const p of state.places) {
-                const d = calculateDistance(state.currentPosition.lat, state.currentPosition.lng, p.lat, p.lng);
-                if (d < minD) { minD = d; nearest = p; }
-            }
-            return nearest;
-        }
-
-        function startBreadcrumbReturn() {
-            if (state.breadcrumbReturn.length < 2) { showToast('No breadcrumb', 'error'); return; }
-            const ret = [...state.breadcrumbReturn].reverse();
-            state.activeRoute = { points: ret, name: 'Return', isBreadcrumb: true };
-            state.currentWaypointIndex = 0;
-            state.selectedDestination = { name: 'Start', lat: ret[ret.length - 1].lat, lng: ret[ret.length - 1].lng, alt: ret[ret.length - 1].alt };
-            el.noDestination.classList.add('hidden');
-            el.compass.classList.remove('hidden');
-            el.navInfo.classList.remove('hidden');
-            el.navDestination.textContent = '→ Return';
-            showToast('Following breadcrumbs', 'success');
-            updateNavigation();
-        }
-
-        // ============================================
-        // Multi-Stop
-        // ============================================
-        function showMultiStopModal() {
-            const list = document.getElementById('multiStopList');
-            list.innerHTML = '';
-            for (const p of state.places) {
-                const item = document.createElement('div');
-                item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;cursor:pointer;';
-                item.innerHTML = `<input type="checkbox" data-place-id="${p.id}"><span style="font-size:0.85rem">${p.name}</span>`;
-                list.appendChild(item);
-            }
-            document.getElementById('multiStopModal').classList.add('active');
-        }
-
-        function startMultiStopTrip() {
-            const cbs = document.querySelectorAll('#multiStopList input:checked');
-            if (cbs.length < 2) { showToast('Select 2+ places', 'error'); return; }
-            state.multiStopTrip = Array.from(cbs).map(cb => parseInt(cb.dataset.placeId));
-            state.currentTripIndex = 0;
-            document.getElementById('multiStopModal').classList.remove('active');
-            state.multiStopTrip = optimizeTripOrder(state.multiStopTrip);
-            showToast(`Trip: ${state.multiStopTrip.length} stops`, 'success');
-            startNavigation(state.multiStopTrip[0]);
-        }
-
-        function optimizeTripOrder(ids) {
-            if (!state.currentPosition) return ids;
-            const result = [], remaining = [...ids];
-            let pos = state.currentPosition;
-            while (remaining.length > 0) {
-                let nearIdx = 0, minD = Infinity;
-                for (let i = 0; i < remaining.length; i++) {
-                    const place = state.places.find(p => p.id === remaining[i]);
-                    if (!place) continue;
-                    const d = calculateDistance(pos.lat, pos.lng, place.lat, place.lng);
-                    if (d < minD) { minD = d; nearIdx = i; }
-                }
-                const nextId = remaining.splice(nearIdx, 1)[0];
-                result.push(nextId);
-                const next = state.places.find(p => p.id === nextId);
-                if (next) pos = next;
-            }
-            return result;
-        }
-
-        // ============================================
-        // Patterns
-        // ============================================
-        function checkPatterns() {
-            const now = new Date();
-            const day = now.getDay(), hour = now.getHours();
-            for (const p of state.patterns) {
-                if (p.dayOfWeek === day && Math.abs(p.hour - hour) <= 1 && !p.suggested) {
-                    const place = state.places.find(x => x.id === p.placeId);
-                    if (place && p.count >= 3) {
-                        p.suggested = true;
-                        // Could show suggestion UI
+                
+                // Add to mesh
+                const start = findOrCreateNode(state.routeMesh, route.points[0]);
+                const end = findOrCreateNode(state.routeMesh, route.points[route.points.length - 1]);
+                
+                // Find intersections with ALL other routes
+                for (const other of state.routes) {
+                    if (other.id === route.id || !other.points) continue;
+                    const ints = findAllIntersections(route.points, other.points, 25);
+                    for (const int of ints) {
+                        const node = findOrCreateNode(state.routeMesh, int.point);
+                        // Save segment
+                        const seg = { points: int.segmentPoints, fromRouteId: route.id, toRouteId: other.id, distance: calculateRouteDistance(int.segmentPoints), timestamp: Date.now() };
+                        const segId = await dbAdd('segments', seg);
+                        seg.id = segId;
+                        state.segments.push(seg);
                     }
                 }
+                
+                // Create edges along route
+                const nodes = getNodesAlongRoute(state.routeMesh, route);
+                for (let i = 0; i < nodes.length - 1; i++) {
+                    const exists = state.routeMesh.edges.find(e => (e.from === nodes[i].id && e.to === nodes[i + 1].id) || (e.from === nodes[i + 1].id && e.to === nodes[i].id));
+                    if (!exists) {
+                        state.routeMesh.edges.push({ 
+                            from: nodes[i].id, 
+                            to: nodes[i + 1].id, 
+                            distance: calculateDistance(nodes[i].lat, nodes[i].lng, nodes[i + 1].lat, nodes[i + 1].lng), 
+                            routeId: route.id, 
+                            hasStairs: route.hasStairs 
+                        });
+                    }
+                }
+                
+                // Update confidence based on walk count
+                if (route.walkCount > 1) route.confidence = Math.min(5, Math.floor(route.walkCount / 2) + 1);
+                
+                processed++;
+                progress.textContent = `${Math.round((processed / total) * 100)}%`;
+                
+                // Allow UI to update
+                await new Promise(r => setTimeout(r, 10));
+            }
+            
+            // Save mesh
+            await dbPut('mesh', { id: 'main', ...state.routeMesh });
+            
+            overlay.classList.remove('active');
+            showToast(`Rebuilt: ${state.routeMesh.nodes.length} nodes, ${state.routeMesh.edges.length} edges, ${state.segments.length} segments`, 'success');
+            
+        } catch (e) {
+            console.error('Rebuild failed:', e);
+            overlay.classList.remove('active');
+            showToast('Rebuild failed', 'error');
+        }
+    }
+
+    async function updateRouteMesh(route) {
+        let mesh = state.routeMesh || { nodes: [], edges: [] };
+        const start = findOrCreateNode(mesh, route.startPoint || route.points[0]);
+        const end = findOrCreateNode(mesh, route.endPoint || route.points[route.points.length - 1]);
+        for (const existing of state.routes) {
+            if (existing.id === route.id) continue;
+            const ints = findAllIntersections(route.points, existing.points, 25);
+            for (const int of ints) findOrCreateNode(mesh, int.point);
+        }
+        const nodes = getNodesAlongRoute(mesh, route);
+        for (let i = 0; i < nodes.length - 1; i++) {
+            const exists = mesh.edges.find(e => (e.from === nodes[i].id && e.to === nodes[i + 1].id) || (e.from === nodes[i + 1].id && e.to === nodes[i].id));
+            if (!exists) {
+                mesh.edges.push({ from: nodes[i].id, to: nodes[i + 1].id, distance: calculateDistance(nodes[i].lat, nodes[i].lng, nodes[i + 1].lat, nodes[i + 1].lng), routeId: route.id, hasStairs: route.hasStairs });
             }
         }
+        state.routeMesh = mesh;
+        await dbPut('mesh', { id: 'main', ...mesh });
+    }
 
-        async function learnPattern(placeId) {
-            const now = new Date();
-            const pattern = { placeId, dayOfWeek: now.getDay(), hour: now.getHours(), count: 1, timestamp: Date.now() };
-            const existing = state.patterns.find(p => p.placeId === placeId && p.dayOfWeek === pattern.dayOfWeek && Math.abs(p.hour - pattern.hour) <= 1);
-            if (existing) { existing.count++; await dbPut('patterns', existing); }
-            else { const id = await dbAdd('patterns', pattern); pattern.id = id; state.patterns.push(pattern); }
+    function findOrCreateNode(mesh, pt, threshold = 25) {
+        for (const n of mesh.nodes) {
+            if (calculateDistance(n.lat, n.lng, pt.lat, pt.lng) < threshold) return n;
         }
+        const node = { id: `n_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`, lat: pt.lat, lng: pt.lng, alt: pt.alt };
+        mesh.nodes.push(node);
+        return node;
+    }
 
-        // ============================================
-        // Places
-        // ============================================
-        async function savePlace(name) {
-            if (!state.currentPosition) { showToast('Waiting for GPS', 'error'); return; }
-            const place = {
-                name,
-                lat: state.currentPosition.lat,
-                lng: state.currentPosition.lng,
-                alt: state.currentPosition.alt,
-                type: document.getElementById('placeType').value,
-                note: document.getElementById('placeNote').value,
-                timestamp: Date.now()
-            };
-            try {
-                const id = await dbAdd('places', place);
-                place.id = id;
-                state.places.push(place);
-                showToast(`Place "${name}" saved!`, 'success');
-                renderPlaces();
-                updateDestinationDropdown();
-                updateDataStats();
-            } catch (e) { showToast('Failed', 'error'); }
-            el.savePlaceModal.classList.remove('active');
+    function getNodesAlongRoute(mesh, route) {
+        const nodes = [];
+        const pts = route.points || [];
+        for (const pt of pts) {
+            const near = mesh.nodes.find(n => !nodes.includes(n) && calculateDistance(n.lat, n.lng, pt.lat, pt.lng) < 25);
+            if (near) nodes.push(near);
         }
+        return nodes;
+    }
 
-        async function deletePlace(id) {
-            await dbDelete('places', id);
-            state.places = state.places.filter(p => p.id !== id);
+    // ============================================
+    // Navigation
+    // ============================================
+    function startNavigation(placeId) {
+        const place = state.places.find(p => p.id === placeId);
+        if (!place) return;
+        state.selectedDestination = place;
+        state.activeRoute = null;
+        state.currentWaypointIndex = 0;
+        state.isOffRoute = false;
+        const route = findBestRoute(state.currentPosition, place);
+        if (route) {
+            state.activeRoute = route;
+            state.currentWaypointIndex = findNearestWaypointIndex(route.points, state.currentPosition);
+            showToast('Following route', 'success');
+        } else {
+            showToast('No route - direct', 'warning');
+        }
+        el.noDestination.classList.add('hidden');
+        el.compass.classList.remove('hidden');
+        el.navInfo.classList.remove('hidden');
+        el.offRouteBanner.classList.add('hidden');
+        el.navDestination.textContent = `→ ${place.name}`;
+        if (state.needsCompassPermission) el.calibrateBtn.classList.remove('hidden');
+        else el.calibrateBtn.classList.add('hidden');
+        if (navigator.vibrate) navigator.vibrate(50);
+        updateNavigation();
+        learnPattern(placeId);
+    }
+
+    function stopNavigation() {
+        state.selectedDestination = null;
+        state.activeRoute = null;
+        state.currentWaypointIndex = 0;
+        state.isOffRoute = false;
+        el.destinationSelect.value = '';
+        el.noDestination.classList.remove('hidden');
+        el.compass.classList.add('hidden');
+        el.navInfo.classList.add('hidden');
+        el.offRouteBanner.classList.add('hidden');
+    }
+
+    function findBestRoute(currentPos, dest) {
+        if (!currentPos || !state.routes.length) return null;
+        const threshold = 50;
+        const now = new Date();
+        const mins = now.getHours() * 60 + now.getMinutes();
+        let best = null, bestScore = Infinity;
+        for (const route of state.routes) {
+            if (!route.points || route.points.length < 2) continue;
+            if (route.tags?.timeStart && route.tags?.timeEnd) {
+                const [sh, sm] = route.tags.timeStart.split(':').map(Number);
+                const [eh, em] = route.tags.timeEnd.split(':').map(Number);
+                if (mins < sh * 60 + sm || mins > eh * 60 + em) continue;
+            }
+            if (state.settings.avoidWet && route.tags?.avoidWet) continue;
+            if (state.settings.preferFlat && route.hasStairs) continue;
+            const start = route.points[0], end = route.points[route.points.length - 1];
+            let reversed = false;
+            let endDist = calculate3DDistance(end.lat, end.lng, end.alt, dest.lat, dest.lng, dest.alt);
+            if (endDist > threshold) {
+                const startDist = calculate3DDistance(start.lat, start.lng, start.alt, dest.lat, dest.lng, dest.alt);
+                if (startDist > threshold) continue;
+                reversed = true;
+            }
+            const pts = reversed ? [...route.points].reverse() : route.points;
+            const nearIdx = findNearestWaypointIndex(pts, currentPos);
+            const nearPt = pts[nearIdx];
+            const nearDist = calculate3DDistance(nearPt.lat, nearPt.lng, nearPt.alt, currentPos.lat, currentPos.lng, currentPos.alt);
+            if (nearDist < threshold) {
+                const score = nearDist + nearIdx * 2 - (route.confidence || 1) * 10 - (route.walkCount || 1) * 5;
+                if (score < bestScore) { bestScore = score; best = { ...route, points: pts }; }
+            }
+        }
+        if (!best && state.routeMesh) best = findMeshRoute(currentPos, dest);
+        return best;
+    }
+
+    function findMeshRoute(currentPos, dest) {
+        if (!state.routeMesh?.nodes?.length) return null;
+        const startN = findClosestNode(state.routeMesh, currentPos);
+        const endN = findClosestNode(state.routeMesh, dest);
+        if (!startN || !endN) return null;
+        const dist = {}, prev = {}, unvisited = new Set();
+        for (const n of state.routeMesh.nodes) { dist[n.id] = Infinity; prev[n.id] = null; unvisited.add(n.id); }
+        dist[startN.id] = 0;
+        while (unvisited.size > 0) {
+            let cur = null, minD = Infinity;
+            for (const id of unvisited) if (dist[id] < minD) { minD = dist[id]; cur = id; }
+            if (cur === null || cur === endN.id) break;
+            unvisited.delete(cur);
+            const neighbors = state.routeMesh.edges.filter(e => e.from === cur || e.to === cur);
+            for (const edge of neighbors) {
+                const nid = edge.from === cur ? edge.to : edge.from;
+                if (!unvisited.has(nid)) continue;
+                let cost = edge.distance;
+                if (state.settings.preferFlat && edge.hasStairs) cost += 1000;
+                const newD = dist[cur] + cost;
+                if (newD < dist[nid]) { dist[nid] = newD; prev[nid] = cur; }
+            }
+        }
+        const path = [];
+        let c = endN.id;
+        while (c) { const n = state.routeMesh.nodes.find(x => x.id === c); if (n) path.unshift(n); c = prev[c]; }
+        return path.length > 1 ? { points: path, isMesh: true, name: 'Combined' } : null;
+    }
+
+    function findClosestNode(mesh, pos) {
+        let closest = null, minD = Infinity;
+        for (const n of mesh.nodes) {
+            const d = calculateDistance(n.lat, n.lng, pos.lat, pos.lng);
+            if (d < minD) { minD = d; closest = n; }
+        }
+        return minD < 100 ? closest : null;
+    }
+
+    function findNearestWaypointIndex(pts, pos) {
+        let idx = 0, minD = Infinity;
+        for (let i = 0; i < pts.length; i++) {
+            const d = calculate3DDistance(pts[i].lat, pts[i].lng, pts[i].alt, pos.lat, pos.lng, pos.alt);
+            if (d < minD) { minD = d; idx = i; }
+        }
+        return idx;
+    }
+
+    function updateNavigation() {
+        if (!state.selectedDestination || !state.currentPosition) return;
+        const cur = state.currentPosition;
+        let target, isFinal = false;
+        if (state.activeRoute?.points?.length > 0) {
+            const pts = state.activeRoute.points;
+            const wp = pts[state.currentWaypointIndex];
+            const distWp = calculate3DDistance(cur.lat, cur.lng, cur.alt, wp.lat, wp.lng, wp.alt);
+            const off = distWp > 50;
+            if (off && !state.isOffRoute) { state.isOffRoute = true; el.offRouteBanner.classList.remove('hidden'); if (navigator.vibrate) navigator.vibrate([100, 100, 100]); }
+            else if (!off && state.isOffRoute) { state.isOffRoute = false; el.offRouteBanner.classList.add('hidden'); }
+            if (distWp < 8 && state.currentWaypointIndex < pts.length - 1) { state.currentWaypointIndex++; if (navigator.vibrate) navigator.vibrate(30); }
+            target = pts[state.currentWaypointIndex];
+            isFinal = state.currentWaypointIndex === pts.length - 1;
+            const prog = Math.round((state.currentWaypointIndex / (pts.length - 1)) * 100);
+            el.navDestination.textContent = `→ ${state.selectedDestination.name} (${prog}%)`;
+        } else {
+            target = state.selectedDestination;
+            isFinal = true;
+        }
+        const dist = calculate3DDistance(cur.lat, cur.lng, cur.alt, target.lat, target.lng, target.alt);
+        if (dist >= 1000) { el.navDistanceValue.textContent = (dist / 1000).toFixed(1); el.navDistanceUnit.textContent = 'km'; }
+        else { el.navDistanceValue.textContent = Math.round(dist); el.navDistanceUnit.textContent = 'm'; }
+        const bearing = calculateBearing(cur.lat, cur.lng, target.lat, target.lng);
+        let total = dist;
+        if (state.activeRoute && state.currentWaypointIndex < state.activeRoute.points.length - 1) {
+            for (let i = state.currentWaypointIndex; i < state.activeRoute.points.length - 1; i++) {
+                const p1 = state.activeRoute.points[i], p2 = state.activeRoute.points[i + 1];
+                total += calculateDistance(p1.lat, p1.lng, p2.lat, p2.lng);
+            }
+        }
+        el.navEta.textContent = `ETA: ${Math.round((total / 1000) / 5 * 60)} min`;
+        state.targetBearing = bearing;
+        updateCompassArrow();
+        if (isFinal && dist < 15) {
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+            showToast(`Arrived at ${state.selectedDestination.name}!`, 'success');
+            if (state.multiStopTrip.length > 0 && state.currentTripIndex < state.multiStopTrip.length - 1) {
+                state.currentTripIndex++;
+                startNavigation(state.multiStopTrip[state.currentTripIndex]);
+            } else stopNavigation();
+        }
+    }
+
+    function updateCompassArrow() {
+        if (!state.targetBearing) return;
+        let rot = state.targetBearing;
+        if (state.deviceHeading !== null) rot = state.targetBearing - state.deviceHeading;
+        let norm = ((rot % 360) + 360) % 360;
+        if (norm > 180) norm -= 360;
+        const abs = Math.abs(norm);
+        if (el.navHint) {
+            if (abs < 15) { el.navHint.innerHTML = '<strong>✓ On track!</strong>'; el.navHint.style.borderColor = 'var(--accent)'; }
+            else if (abs < 45) { el.navHint.innerHTML = `<strong>Almost!</strong> Turn slightly ${norm > 0 ? 'right' : 'left'}`; el.navHint.style.borderColor = 'var(--warning)'; }
+            else if (abs < 135) { el.navHint.innerHTML = `<strong>Turn ${norm > 0 ? 'right' : 'left'}</strong>`; el.navHint.style.borderColor = ''; }
+            else { el.navHint.innerHTML = '<strong>Turn around</strong>'; el.navHint.style.borderColor = ''; }
+        }
+        const ringRot = (((-rot) % 360) + 360) % 360;
+        if (el.compassDirs) el.compassDirs.style.transform = `rotate(${ringRot}deg)`;
+    }
+
+    // ============================================
+    // Panic / Home / Nearest
+    // ============================================
+    function panicGetHome() {
+        let home = state.places.find(p => p.type === 'home') || state.places.find(p => p.type === 'safe') || findNearestPlace();
+        if (home) {
+            showToast('Heading home...', 'success');
+            el.destinationSelect.value = home.id;
+            startNavigation(home.id);
+            document.querySelector('[data-view="navigate"]').click();
+        } else showToast('No home saved', 'error');
+    }
+
+    function findNearestPlace() {
+        if (!state.currentPosition || !state.places.length) return null;
+        let nearest = null, minD = Infinity;
+        for (const p of state.places) {
+            const d = calculateDistance(state.currentPosition.lat, state.currentPosition.lng, p.lat, p.lng);
+            if (d < minD) { minD = d; nearest = p; }
+        }
+        return nearest;
+    }
+
+    function startBreadcrumbReturn() {
+        if (state.breadcrumbReturn.length < 2) { showToast('No breadcrumb', 'error'); return; }
+        const ret = [...state.breadcrumbReturn].reverse();
+        state.activeRoute = { points: ret, name: 'Return', isBreadcrumb: true };
+        state.currentWaypointIndex = 0;
+        state.selectedDestination = { name: 'Start', lat: ret[ret.length - 1].lat, lng: ret[ret.length - 1].lng, alt: ret[ret.length - 1].alt };
+        el.noDestination.classList.add('hidden');
+        el.compass.classList.remove('hidden');
+        el.navInfo.classList.remove('hidden');
+        el.navDestination.textContent = '→ Return';
+        showToast('Following breadcrumbs', 'success');
+        updateNavigation();
+    }
+
+    // ============================================
+    // Multi-Stop
+    // ============================================
+    function showMultiStopModal() {
+        const list = document.getElementById('multiStopList');
+        list.innerHTML = '';
+        for (const p of state.places) {
+            const item = document.createElement('div');
+            item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;cursor:pointer;';
+            item.innerHTML = `<input type="checkbox" data-place-id="${p.id}"><span style="font-size:0.85rem">${p.name}</span>`;
+            list.appendChild(item);
+        }
+        document.getElementById('multiStopModal').classList.add('active');
+    }
+
+    function startMultiStopTrip() {
+        const cbs = document.querySelectorAll('#multiStopList input:checked');
+        if (cbs.length < 2) { showToast('Select 2+ places', 'error'); return; }
+        state.multiStopTrip = Array.from(cbs).map(cb => parseInt(cb.dataset.placeId));
+        state.currentTripIndex = 0;
+        document.getElementById('multiStopModal').classList.remove('active');
+        state.multiStopTrip = optimizeTripOrder(state.multiStopTrip);
+        showToast(`Trip: ${state.multiStopTrip.length} stops`, 'success');
+        startNavigation(state.multiStopTrip[0]);
+    }
+
+    function optimizeTripOrder(ids) {
+        if (!state.currentPosition) return ids;
+        const result = [], remaining = [...ids];
+        let pos = state.currentPosition;
+        while (remaining.length > 0) {
+            let nearIdx = 0, minD = Infinity;
+            for (let i = 0; i < remaining.length; i++) {
+                const place = state.places.find(p => p.id === remaining[i]);
+                if (!place) continue;
+                const d = calculateDistance(pos.lat, pos.lng, place.lat, place.lng);
+                if (d < minD) { minD = d; nearIdx = i; }
+            }
+            const nextId = remaining.splice(nearIdx, 1)[0];
+            result.push(nextId);
+            const next = state.places.find(p => p.id === nextId);
+            if (next) pos = next;
+        }
+        return result;
+    }
+
+    // ============================================
+    // Patterns
+    // ============================================
+    function checkPatterns() {
+        const now = new Date();
+        const day = now.getDay(), hour = now.getHours();
+        for (const p of state.patterns) {
+            if (p.dayOfWeek === day && Math.abs(p.hour - hour) <= 1 && !p.suggested) {
+                const place = state.places.find(x => x.id === p.placeId);
+                if (place && p.count >= 3) {
+                    p.suggested = true;
+                    // Could show suggestion UI
+                }
+            }
+        }
+    }
+
+    async function learnPattern(placeId) {
+        const now = new Date();
+        const pattern = { placeId, dayOfWeek: now.getDay(), hour: now.getHours(), count: 1, timestamp: Date.now() };
+        const existing = state.patterns.find(p => p.placeId === placeId && p.dayOfWeek === pattern.dayOfWeek && Math.abs(p.hour - pattern.hour) <= 1);
+        if (existing) { existing.count++; await dbPut('patterns', existing); }
+        else { const id = await dbAdd('patterns', pattern); pattern.id = id; state.patterns.push(pattern); }
+    }
+
+    // ============================================
+    // Places
+    // ============================================
+    async function savePlace(name) {
+        if (!state.currentPosition) { showToast('Waiting for GPS', 'error'); return; }
+        const place = {
+            name,
+            lat: state.currentPosition.lat,
+            lng: state.currentPosition.lng,
+            alt: state.currentPosition.alt,
+            type: document.getElementById('placeType').value,
+            note: document.getElementById('placeNote').value,
+            timestamp: Date.now()
+        };
+        try {
+            const id = await dbAdd('places', place);
+            place.id = id;
+            state.places.push(place);
+            showToast(`Place "${name}" saved!`, 'success');
             renderPlaces();
             updateDestinationDropdown();
             updateDataStats();
-            showToast('Deleted', 'success');
-        }
+        } catch (e) { showToast('Failed', 'error'); }
+        el.savePlaceModal.classList.remove('active');
+    }
 
-        async function deleteRoute(id) {
-            await dbDelete('routes', id);
-            state.routes = state.routes.filter(r => r.id !== id);
-            renderRoutes();
-            updateDataStats();
-            showToast('Deleted', 'success');
-        }
+    async function deletePlace(id) {
+        await dbDelete('places', id);
+        state.places = state.places.filter(p => p.id !== id);
+        renderPlaces();
+        updateDestinationDropdown();
+        updateDataStats();
+        showToast('Deleted', 'success');
+    }
 
-        // ============================================
-        // Map
-        // ============================================
-        function renderMap() {
-            const canvas = el.mapCanvas;
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            ctx.fillStyle = '#1a1a1a';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            if (state.routes.length === 0 && state.places.length === 0) {
-                ctx.fillStyle = '#555';
-                ctx.font = '12px Outfit';
-                ctx.textAlign = 'center';
-                ctx.fillText('No data', canvas.width / 2, canvas.height / 2);
-                return;
-            }
-            let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
-            if (state.showRoutes) {
-                for (const r of state.routes) for (const p of r.points) { minLat = Math.min(minLat, p.lat); maxLat = Math.max(maxLat, p.lat); minLng = Math.min(minLng, p.lng); maxLng = Math.max(maxLng, p.lng); }
-            }
-            if (state.showPlaces) {
-                for (const p of state.places) { minLat = Math.min(minLat, p.lat); maxLat = Math.max(maxLat, p.lat); minLng = Math.min(minLng, p.lng); maxLng = Math.max(maxLng, p.lng); }
-            }
-            if (state.showLive && state.currentPosition) {
-                minLat = Math.min(minLat, state.currentPosition.lat); maxLat = Math.max(maxLat, state.currentPosition.lat);
-                minLng = Math.min(minLng, state.currentPosition.lng); maxLng = Math.max(maxLng, state.currentPosition.lng);
-            }
-            const pad = 25;
-            const latR = maxLat - minLat || 0.001, lngR = maxLng - minLng || 0.001;
-            const scale = Math.min((canvas.width - pad * 2) / lngR, (canvas.height - pad * 2) / latR);
-            const toX = lng => pad + (lng - minLng) * scale;
-            const toY = lat => canvas.height - pad - (lat - minLat) * scale;
-            if (state.showRoutes) {
-                for (const route of state.routes) {
-                    ctx.strokeStyle = route.hasStairs ? '#ef4444' : '#4ade80';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    for (let i = 0; i < route.points.length; i++) {
-                        const x = toX(route.points[i].lng), y = toY(route.points[i].lat);
-                        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                    }
-                    ctx.stroke();
-                }
-            }
-            if (state.showPlaces) {
-                for (const p of state.places) {
-                    const x = toX(p.lng), y = toY(p.lat);
-                    ctx.fillStyle = p.type === 'home' ? '#4ade80' : p.type === 'work' ? '#3b82f6' : p.type === 'safe' ? '#f59e0b' : '#888';
-                    ctx.beginPath();
-                    ctx.arc(x, y, 5, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#fff';
-                    ctx.font = '9px Outfit';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(p.name, x, y - 8);
-                }
-            }
-            if (state.showLive && state.currentPosition) {
-                const x = toX(state.currentPosition.lng), y = toY(state.currentPosition.lat);
-                ctx.fillStyle = '#ef4444';
-                ctx.beginPath();
-                ctx.arc(x, y, 7, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = '#fff';
+    async function deleteRoute(id) {
+        await dbDelete('routes', id);
+        state.routes = state.routes.filter(r => r.id !== id);
+        renderRoutes();
+        updateDataStats();
+        showToast('Deleted', 'success');
+    }
+
+    // ============================================
+    // Map
+    // ============================================
+    function renderMap() {
+        const canvas = el.mapCanvas;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (state.routes.length === 0 && state.places.length === 0) {
+            ctx.fillStyle = '#555';
+            ctx.font = '12px Outfit';
+            ctx.textAlign = 'center';
+            ctx.fillText('No data', canvas.width / 2, canvas.height / 2);
+            return;
+        }
+        let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
+        if (state.showRoutes) {
+            for (const r of state.routes) for (const p of r.points) { minLat = Math.min(minLat, p.lat); maxLat = Math.max(maxLat, p.lat); minLng = Math.min(minLng, p.lng); maxLng = Math.max(maxLng, p.lng); }
+        }
+        if (state.showPlaces) {
+            for (const p of state.places) { minLat = Math.min(minLat, p.lat); maxLat = Math.max(maxLat, p.lat); minLng = Math.min(minLng, p.lng); maxLng = Math.max(maxLng, p.lng); }
+        }
+        if (state.showLive && state.currentPosition) {
+            minLat = Math.min(minLat, state.currentPosition.lat); maxLat = Math.max(maxLat, state.currentPosition.lat);
+            minLng = Math.min(minLng, state.currentPosition.lng); maxLng = Math.max(maxLng, state.currentPosition.lng);
+        }
+        const pad = 25;
+        const latR = maxLat - minLat || 0.001, lngR = maxLng - minLng || 0.001;
+        const scale = Math.min((canvas.width - pad * 2) / lngR, (canvas.height - pad * 2) / latR);
+        const toX = lng => pad + (lng - minLng) * scale;
+        const toY = lat => canvas.height - pad - (lat - minLat) * scale;
+        if (state.showRoutes) {
+            for (const route of state.routes) {
+                ctx.strokeStyle = route.hasStairs ? '#ef4444' : '#4ade80';
                 ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let i = 0; i < route.points.length; i++) {
+                    const x = toX(route.points[i].lng), y = toY(route.points[i].lat);
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
                 ctx.stroke();
             }
         }
-
-        // ============================================
-        // Data Export/Import
-        // ============================================
-        async function exportData() {
-            const data = { version: 2, exportedAt: new Date().toISOString(), app: 'NorthPath', routes: state.routes, places: state.places, segments: state.segments, patterns: state.patterns, settings: state.settings };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `WalkerData_${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast('Downloaded', 'success');
-        }
-
-        async function importData(file) {
-            try {
-                const text = await file.text();
-                const data = JSON.parse(text);
-                if (!data.app || (data.app !== 'NorthPath' && data.app !== 'PathMem')) { showToast('Invalid file', 'error'); return; }
-                let r = 0, p = 0;
-                if (data.routes) for (const route of data.routes) { const { id, ...d } = route; await dbAdd('routes', d); r++; }
-                if (data.places) for (const place of data.places) { const { id, ...d } = place; await dbAdd('places', d); p++; }
-                if (data.settings) state.settings = { ...state.settings, ...data.settings };
-                state.routes = await dbGetAll('routes');
-                state.places = await dbGetAll('places');
-                renderRoutes();
-                renderPlaces();
-                updateDestinationDropdown();
-                updateDataStats();
-                showToast(`Imported ${r} routes, ${p} places`, 'success');
-            } catch (e) { showToast('Import failed', 'error'); }
-        }
-
-        function updateDataStats() {
-            let pts = 0;
-            for (const r of state.routes) if (r.points) pts += r.points.length;
-            document.getElementById('totalRoutes').textContent = state.routes.length;
-            document.getElementById('totalPlaces').textContent = state.places.length;
-            document.getElementById('totalPoints').textContent = pts;
-        }
-
-        // ============================================
-        // Utility
-        // ============================================
-        function calculateDistance(lat1, lng1, lat2, lng2) {
-            const R = 6371000;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLng = (lng2 - lng1) * Math.PI / 180;
-            const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        }
-
-        function calculate3DDistance(lat1, lng1, alt1, lat2, lng2, alt2) {
-            const h = calculateDistance(lat1, lng1, lat2, lng2);
-            const v = (alt1 != null && alt2 != null) ? Math.abs(alt1 - alt2) : 0;
-            return Math.sqrt(h * h + v * v);
-        }
-
-        function calculateBearing(lat1, lng1, lat2, lng2) {
-            const dLng = (lng2 - lng1) * Math.PI / 180;
-            const y = Math.sin(dLng) * Math.cos(lat2 * Math.PI / 180);
-            const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) - Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLng);
-            return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-        }
-
-        function calculateRouteDistance(pts) {
-            let total = 0;
-            for (let i = 1; i < pts.length; i++) total += calculateDistance(pts[i - 1].lat, pts[i - 1].lng, pts[i].lat, pts[i].lng);
-            return total;
-        }
-
-        function formatDuration(ms) {
-            const s = Math.floor(ms / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60);
-            if (h > 0) return `${h}:${String(m % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-            return `${m}:${String(s % 60).padStart(2, '0')}`;
-        }
-
-        function formatDate(ts) {
-            return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-        }
-
-        function showToast(msg, type = 'success') {
-            el.toast.textContent = msg;
-            el.toast.className = `toast ${type} show`;
-            setTimeout(() => el.toast.classList.remove('show'), 3000);
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // ============================================
-        // Rendering
-        // ============================================
-        function renderRoutes() {
-            const list = el.routeList;
-            if (state.routes.length === 0) { el.routesEmpty.style.display = 'block'; el.routesCount.textContent = '0 routes'; return; }
-            el.routesEmpty.style.display = 'none';
-            el.routesCount.textContent = `${state.routes.length} routes`;
-            list.querySelectorAll('.route-card').forEach(c => c.remove());
-            const sorted = [...state.routes].sort((a, b) => b.timestamp - a.timestamp);
-            for (const route of sorted) {
-                const conf = route.confidence || 1;
-                const dots = Array(5).fill(0).map((_, i) => `<div class="conf-dot ${i < conf ? 'filled' : ''}"></div>`).join('');
-                let tags = '';
-                if (route.tags?.avoidWet) tags += '<span class="route-tag wet">Wet</span>';
-                if (route.tags?.avoidDark) tags += '<span class="route-tag">Dark</span>';
-                if (route.tags?.timeStart) tags += `<span class="route-tag time">${route.tags.timeStart}-${route.tags.timeEnd}</span>`;
-                if (route.hasStairs) tags += '<span class="route-tag stairs">Stairs</span>';
-                const card = document.createElement('div');
-                card.className = 'route-card';
-                card.innerHTML = `<div class="route-card-header"><span class="route-name">${escapeHtml(route.name)}</span><span class="route-date">${formatDate(route.timestamp)}</span></div><div class="route-meta"><span>${(route.distance / 1000).toFixed(2)}km</span><span>${formatDuration(route.duration || 0)}</span><span>${route.walkCount || 1}x</span><div class="confidence">${dots}</div></div>${tags ? `<div class="route-tags">${tags}</div>` : ''}`;
-                card.addEventListener('click', () => showRouteDetail(route));
-                list.appendChild(card);
-            }
-        }
-
-        function showRouteDetail(route) {
-            document.getElementById('routeDetailName').textContent = route.name;
-            document.getElementById('routeDetailContent').innerHTML = `<p style="font-size:0.8rem;color:var(--text-secondary)">Distance: ${(route.distance / 1000).toFixed(2)}km<br>Duration: ${formatDuration(route.duration || 0)}<br>Walked: ${route.walkCount || 1}x<br>Points: ${route.points?.length || 0}${route.hasStairs ? '<br>Has stairs' : ''}</p>`;
-            document.getElementById('deleteDetail').onclick = () => { if (confirm('Delete?')) { deleteRoute(route.id); document.getElementById('routeDetailModal').classList.remove('active'); } };
-            document.getElementById('routeDetailModal').classList.add('active');
-        }
-
-        function renderPlaces() {
-            const list = el.placeList;
-            if (state.places.length === 0) { el.placesEmpty.style.display = 'block'; return; }
-            el.placesEmpty.style.display = 'none';
-            list.querySelectorAll('.place-card').forEach(c => c.remove());
-            for (const place of state.places) {
-                const routeCount = state.routes.filter(r => r.points?.some(p => calculateDistance(p.lat, p.lng, place.lat, place.lng) < 50)).length;
-                const alt = place.alt != null ? ` | ${Math.round(place.alt)}m` : '';
-                const iconCls = place.type || 'default';
-                const card = document.createElement('div');
-                card.className = 'place-card';
-                card.innerHTML = `<div class="place-info"><div class="place-icon ${iconCls}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="place-name">${escapeHtml(place.name)}</div><div class="place-meta">${routeCount} routes${alt}</div></div></div><div class="place-actions"><button class="place-action-btn nav-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></button><button class="place-action-btn danger del-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div>`;
-                card.querySelector('.nav-btn').addEventListener('click', (e) => { e.stopPropagation(); document.querySelector('[data-view="navigate"]').click(); el.destinationSelect.value = place.id; startNavigation(place.id); });
-                card.querySelector('.del-btn').addEventListener('click', (e) => { e.stopPropagation(); if (confirm(`Delete "${place.name}"?`)) deletePlace(place.id); });
-                list.appendChild(card);
-            }
-        }
-
-        function updateDestinationDropdown() {
-            const sel = el.destinationSelect;
-            while (sel.options.length > 1) sel.remove(1);
+        if (state.showPlaces) {
             for (const p of state.places) {
-                const opt = document.createElement('option');
-                opt.value = p.id;
-                opt.textContent = p.name;
-                sel.appendChild(opt);
+                const x = toX(p.lng), y = toY(p.lat);
+                ctx.fillStyle = p.type === 'home' ? '#4ade80' : p.type === 'work' ? '#3b82f6' : p.type === 'safe' ? '#f59e0b' : '#888';
+                ctx.beginPath();
+                ctx.arc(x, y, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.font = '9px Outfit';
+                ctx.textAlign = 'center';
+                ctx.fillText(p.name, x, y - 8);
             }
         }
-
-        // ============================================
-        // Events
-        // ============================================
-        function setupEvents() {
-            el.grantPermission.addEventListener('click', requestLocation);
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-                    tab.classList.add('active');
-                    document.getElementById(`${tab.dataset.view}View`).classList.add('active');
-                    if (tab.dataset.view === 'map') renderMap();
-                });
-            });
-            el.recordBtn.addEventListener('click', () => state.isRecording ? stopRecording() : startRecording());
-            document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.mode-btn[data-mode]').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    state.recordingMode = btn.dataset.mode;
-                });
-            });
-            document.getElementById('cancelRoute').addEventListener('click', () => { el.saveRouteModal.classList.remove('active'); resetRecordingStats(); });
-            document.getElementById('saveRoute').addEventListener('click', () => { const n = el.routeNameInput.value.trim(); if (n) saveRoute(n); else showToast('Enter name', 'error'); });
-            document.getElementById('tagWet').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.routeTags.avoidWet = e.target.classList.contains('active'); });
-            document.getElementById('tagDark').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.routeTags.avoidDark = e.target.classList.contains('active'); });
-            el.addPlaceBtn.addEventListener('click', () => { if (!state.currentPosition) { showToast('Waiting for GPS', 'error'); return; } el.savePlaceModal.classList.add('active'); el.placeNameInput.value = ''; el.placeNameInput.focus(); });
-            document.getElementById('cancelPlace').addEventListener('click', () => el.savePlaceModal.classList.remove('active'));
-            document.getElementById('savePlace').addEventListener('click', () => { const n = el.placeNameInput.value.trim(); if (n) savePlace(n); else showToast('Enter name', 'error'); });
-            el.destinationSelect.addEventListener('change', (e) => { const id = parseInt(e.target.value); id ? startNavigation(id) : stopNavigation(); });
-            el.calibrateBtn.addEventListener('click', requestCompassPermission);
-            document.getElementById('tripNearest').addEventListener('click', () => { const n = findNearestPlace(); if (n) { el.destinationSelect.value = n.id; startNavigation(n.id); } else showToast('No places', 'error'); });
-            document.getElementById('tripMulti').addEventListener('click', showMultiStopModal);
-            document.getElementById('tripFlat').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.settings.preferFlat = e.target.classList.contains('active'); showToast(state.settings.preferFlat ? 'Avoiding stairs' : 'Stairs OK', 'success'); });
-            document.getElementById('cancelMulti').addEventListener('click', () => document.getElementById('multiStopModal').classList.remove('active'));
-            document.getElementById('startMulti').addEventListener('click', startMultiStopTrip);
-            document.getElementById('closeDetail').addEventListener('click', () => document.getElementById('routeDetailModal').classList.remove('active'));
-            document.getElementById('offRouteRecord').addEventListener('click', () => { state.recordingMode = 'explore'; startRecording(); el.offRouteBanner.classList.add('hidden'); });
-            document.getElementById('offRouteRejoin').addEventListener('click', () => { if (state.activeRoute) { state.currentWaypointIndex = findNearestWaypointIndex(state.activeRoute.points, state.currentPosition); state.isOffRoute = false; el.offRouteBanner.classList.add('hidden'); showToast('Recalculating', 'success'); } });
-            el.panicBtn.addEventListener('click', panicGetHome);
-            document.getElementById('exportBtn').addEventListener('click', exportData);
-            document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
-            document.getElementById('importFile').addEventListener('change', (e) => { if (e.target.files[0]) { importData(e.target.files[0]); e.target.value = ''; } });
-            document.getElementById('toggleWet').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.settings.avoidWet = e.target.classList.contains('active'); });
-            document.getElementById('toggleFlat').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.settings.preferFlat = e.target.classList.contains('active'); });
-            document.getElementById('togglePatterns').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.settings.learnPatterns = e.target.classList.contains('active'); });
-            document.getElementById('mapRoutes').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showRoutes = e.target.classList.contains('active'); renderMap(); });
-            document.getElementById('mapPlaces').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showPlaces = e.target.classList.contains('active'); renderMap(); });
-            document.getElementById('mapLive').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showLive = e.target.classList.contains('active'); renderMap(); });
-            document.getElementById('mapFit').addEventListener('click', renderMap);
-            document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', (e) => { if (e.target === ov) ov.classList.remove('active'); }));
-            el.routeNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('saveRoute').click(); });
-            el.placeNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('savePlace').click(); });
+        if (state.showLive && state.currentPosition) {
+            const x = toX(state.currentPosition.lng), y = toY(state.currentPosition.lat);
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(x, y, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
         }
+    }
 
-        // ============================================
-        // Init
-        // ============================================
-        async function init() {
-            try {
-                initElements();
-                await initDB();
-                state.routes = await dbGetAll('routes');
-                state.places = await dbGetAll('places');
-                state.segments = await dbGetAll('segments');
-                state.patterns = await dbGetAll('patterns');
-                try { const m = await dbGet('mesh', 'main'); if (m) state.routeMesh = m; } catch (e) {}
-                renderRoutes();
-                renderPlaces();
-                updateDestinationDropdown();
-                updateDataStats();
-                setupEvents();
-                await checkPermissions();
-                console.log('NorthPath v2 ready');
-            } catch (e) { console.error('Init failed:', e); showToast('Init failed', 'error'); }
+    // ============================================
+    // Data Export/Import
+    // ============================================
+    async function exportData() {
+        const data = { version: 2, exportedAt: new Date().toISOString(), app: 'NorthPath', routes: state.routes, places: state.places, segments: state.segments, patterns: state.patterns, settings: state.settings };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `WalkerData_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Downloaded', 'success');
+    }
+
+    async function importData(file) {
+        try {
+            const text = await file.text();
+            const data = JSON.parse(text);
+            if (!data.app || (data.app !== 'NorthPath' && data.app !== 'PathMem')) { showToast('Invalid file', 'error'); return; }
+            let r = 0, p = 0;
+            if (data.routes) for (const route of data.routes) { const { id, ...d } = route; await dbAdd('routes', d); r++; }
+            if (data.places) for (const place of data.places) { const { id, ...d } = place; await dbAdd('places', d); p++; }
+            if (data.settings) state.settings = { ...state.settings, ...data.settings };
+            state.routes = await dbGetAll('routes');
+            state.places = await dbGetAll('places');
+            renderRoutes();
+            renderPlaces();
+            updateDestinationDropdown();
+            updateDataStats();
+            showToast(`Imported ${r} routes, ${p} places`, 'success');
+        } catch (e) { showToast('Import failed', 'error'); }
+    }
+
+    function updateDataStats() {
+        let pts = 0;
+        for (const r of state.routes) if (r.points) pts += r.points.length;
+        document.getElementById('totalRoutes').textContent = state.routes.length;
+        document.getElementById('totalPlaces').textContent = state.places.length;
+        document.getElementById('totalPoints').textContent = pts;
+    }
+
+    // ============================================
+    // Utility
+    // ============================================
+    function calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371000;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function calculate3DDistance(lat1, lng1, alt1, lat2, lng2, alt2) {
+        const h = calculateDistance(lat1, lng1, lat2, lng2);
+        const v = (alt1 != null && alt2 != null) ? Math.abs(alt1 - alt2) : 0;
+        return Math.sqrt(h * h + v * v);
+    }
+
+    function calculateBearing(lat1, lng1, lat2, lng2) {
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const y = Math.sin(dLng) * Math.cos(lat2 * Math.PI / 180);
+        const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) - Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLng);
+        return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+    }
+
+    function calculateRouteDistance(pts) {
+        let total = 0;
+        for (let i = 1; i < pts.length; i++) total += calculateDistance(pts[i - 1].lat, pts[i - 1].lng, pts[i].lat, pts[i].lng);
+        return total;
+    }
+
+    function formatDuration(ms) {
+        const s = Math.floor(ms / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60);
+        if (h > 0) return `${h}:${String(m % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+        return `${m}:${String(s % 60).padStart(2, '0')}`;
+    }
+
+    function formatDate(ts) {
+        return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function showToast(msg, type = 'success') {
+        el.toast.textContent = msg;
+        el.toast.className = `toast ${type} show`;
+        setTimeout(() => el.toast.classList.remove('show'), 3000);
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ============================================
+    // Rendering
+    // ============================================
+    function renderRoutes() {
+        const list = el.routeList;
+        if (state.routes.length === 0) { el.routesEmpty.style.display = 'block'; el.routesCount.textContent = '0 routes'; return; }
+        el.routesEmpty.style.display = 'none';
+        el.routesCount.textContent = `${state.routes.length} routes`;
+        list.querySelectorAll('.route-card').forEach(c => c.remove());
+        const sorted = [...state.routes].sort((a, b) => b.timestamp - a.timestamp);
+        for (const route of sorted) {
+            const conf = route.confidence || 1;
+            const dots = Array(5).fill(0).map((_, i) => `<div class="conf-dot ${i < conf ? 'filled' : ''}"></div>`).join('');
+            let tags = '';
+            if (route.tags?.avoidWet) tags += '<span class="route-tag wet">Wet</span>';
+            if (route.tags?.avoidDark) tags += '<span class="route-tag">Dark</span>';
+            if (route.tags?.timeStart) tags += `<span class="route-tag time">${route.tags.timeStart}-${route.tags.timeEnd}</span>`;
+            if (route.hasStairs) tags += '<span class="route-tag stairs">Stairs</span>';
+            const card = document.createElement('div');
+            card.className = 'route-card';
+            card.innerHTML = `<div class="route-card-header"><span class="route-name">${escapeHtml(route.name)}</span><span class="route-date">${formatDate(route.timestamp)}</span></div><div class="route-meta"><span>${(route.distance / 1000).toFixed(2)}km</span><span>${formatDuration(route.duration || 0)}</span><span>${route.walkCount || 1}x</span><div class="confidence">${dots}</div></div>${tags ? `<div class="route-tags">${tags}</div>` : ''}`;
+            card.addEventListener('click', () => showRouteDetail(route));
+            list.appendChild(card);
         }
+    }
 
-        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.error);
-        init();
-    </script>
+    function showRouteDetail(route) {
+        document.getElementById('routeDetailName').textContent = route.name;
+        document.getElementById('routeDetailContent').innerHTML = `<p style="font-size:0.8rem;color:var(--text-secondary)">Distance: ${(route.distance / 1000).toFixed(2)}km<br>Duration: ${formatDuration(route.duration || 0)}<br>Walked: ${route.walkCount || 1}x<br>Points: ${route.points?.length || 0}${route.hasStairs ? '<br>Has stairs' : ''}</p>`;
+        document.getElementById('deleteDetail').onclick = () => { if (confirm('Delete?')) { deleteRoute(route.id); document.getElementById('routeDetailModal').classList.remove('active'); } };
+        document.getElementById('routeDetailModal').classList.add('active');
+    }
+
+    function renderPlaces() {
+        const list = el.placeList;
+        if (state.places.length === 0) { el.placesEmpty.style.display = 'block'; return; }
+        el.placesEmpty.style.display = 'none';
+        list.querySelectorAll('.place-card').forEach(c => c.remove());
+        for (const place of state.places) {
+            const routeCount = state.routes.filter(r => r.points?.some(p => calculateDistance(p.lat, p.lng, place.lat, place.lng) < 50)).length;
+            const alt = place.alt != null ? ` | ${Math.round(place.alt)}m` : '';
+            const iconCls = place.type || 'default';
+            const card = document.createElement('div');
+            card.className = 'place-card';
+            card.innerHTML = `<div class="place-info"><div class="place-icon ${iconCls}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="place-name">${escapeHtml(place.name)}</div><div class="place-meta">${routeCount} routes${alt}</div></div></div><div class="place-actions"><button class="place-action-btn nav-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></button><button class="place-action-btn danger del-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div>`;
+            card.querySelector('.nav-btn').addEventListener('click', (e) => { e.stopPropagation(); document.querySelector('[data-view="navigate"]').click(); el.destinationSelect.value = place.id; startNavigation(place.id); });
+            card.querySelector('.del-btn').addEventListener('click', (e) => { e.stopPropagation(); if (confirm(`Delete "${place.name}"?`)) deletePlace(place.id); });
+            list.appendChild(card);
+        }
+    }
+
+    function updateDestinationDropdown() {
+        const sel = el.destinationSelect;
+        while (sel.options.length > 1) sel.remove(1);
+        for (const p of state.places) {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = p.name;
+            sel.appendChild(opt);
+        }
+    }
+
+    // ============================================
+    // Events
+    // ============================================
+    function setupEvents() {
+        el.grantPermission.addEventListener('click', requestLocation);
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.view}View`).classList.add('active');
+                if (tab.dataset.view === 'map') renderMap();
+            });
+        });
+        el.recordBtn.addEventListener('click', () => state.isRecording ? stopRecording() : startRecording());
+        document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn[data-mode]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.recordingMode = btn.dataset.mode;
+            });
+        });
+        document.getElementById('cancelRoute').addEventListener('click', () => { el.saveRouteModal.classList.remove('active'); resetRecordingStats(); });
+        document.getElementById('saveRoute').addEventListener('click', () => { const n = el.routeNameInput.value.trim(); if (n) saveRoute(n); else showToast('Enter name', 'error'); });
+        document.getElementById('tagWet').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.routeTags.avoidWet = e.target.classList.contains('active'); });
+        document.getElementById('tagDark').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.routeTags.avoidDark = e.target.classList.contains('active'); });
+        el.addPlaceBtn.addEventListener('click', () => { if (!state.currentPosition) { showToast('Waiting for GPS', 'error'); return; } el.savePlaceModal.classList.add('active'); el.placeNameInput.value = ''; el.placeNameInput.focus(); });
+        document.getElementById('cancelPlace').addEventListener('click', () => el.savePlaceModal.classList.remove('active'));
+        document.getElementById('savePlace').addEventListener('click', () => { const n = el.placeNameInput.value.trim(); if (n) savePlace(n); else showToast('Enter name', 'error'); });
+        el.destinationSelect.addEventListener('change', (e) => { const id = parseInt(e.target.value); id ? startNavigation(id) : stopNavigation(); });
+        el.calibrateBtn.addEventListener('click', requestCompassPermission);
+        document.getElementById('tripNearest').addEventListener('click', () => { const n = findNearestPlace(); if (n) { el.destinationSelect.value = n.id; startNavigation(n.id); } else showToast('No places', 'error'); });
+        document.getElementById('tripMulti').addEventListener('click', showMultiStopModal);
+        document.getElementById('tripFlat').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.settings.preferFlat = e.target.classList.contains('active'); showToast(state.settings.preferFlat ? 'Avoiding stairs' : 'Stairs OK', 'success'); });
+        document.getElementById('cancelMulti').addEventListener('click', () => document.getElementById('multiStopModal').classList.remove('active'));
+        document.getElementById('startMulti').addEventListener('click', startMultiStopTrip);
+        document.getElementById('closeDetail').addEventListener('click', () => document.getElementById('routeDetailModal').classList.remove('active'));
+        document.getElementById('offRouteRecord').addEventListener('click', () => { state.recordingMode = 'explore'; startRecording(); el.offRouteBanner.classList.add('hidden'); });
+        document.getElementById('offRouteRejoin').addEventListener('click', () => { if (state.activeRoute) { state.currentWaypointIndex = findNearestWaypointIndex(state.activeRoute.points, state.currentPosition); state.isOffRoute = false; el.offRouteBanner.classList.add('hidden'); showToast('Recalculating', 'success'); } });
+        el.panicBtn.addEventListener('click', panicGetHome);
+        document.getElementById('exportBtn').addEventListener('click', exportData);
+        document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+        document.getElementById('importFile').addEventListener('change', (e) => { if (e.target.files[0]) { importData(e.target.files[0]); e.target.value = ''; } });
+        document.getElementById('rebuildBtn').addEventListener('click', rebuildIntelligence);
+        document.getElementById('toggleWet').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.settings.avoidWet = e.target.classList.contains('active'); });
+        document.getElementById('toggleFlat').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.settings.preferFlat = e.target.classList.contains('active'); });
+        document.getElementById('togglePatterns').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.settings.learnPatterns = e.target.classList.contains('active'); });
+        document.getElementById('mapRoutes').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showRoutes = e.target.classList.contains('active'); renderMap(); });
+        document.getElementById('mapPlaces').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showPlaces = e.target.classList.contains('active'); renderMap(); });
+        document.getElementById('mapLive').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showLive = e.target.classList.contains('active'); renderMap(); });
+        document.getElementById('mapFit').addEventListener('click', renderMap);
+        document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', (e) => { if (e.target === ov) ov.classList.remove('active'); }));
+        el.routeNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('saveRoute').click(); });
+        el.placeNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('savePlace').click(); });
+    }
+
+    // ============================================
+    // Init
+    // ============================================
+    async function init() {
+        try {
+            initElements();
+            await initDB();
+            state.routes = await dbGetAll('routes');
+            state.places = await dbGetAll('places');
+            state.segments = await dbGetAll('segments');
+            state.patterns = await dbGetAll('patterns');
+            try { const m = await dbGet('mesh', 'main'); if (m) state.routeMesh = m; } catch (e) {}
+            renderRoutes();
+            renderPlaces();
+            updateDestinationDropdown();
+            updateDataStats();
+            setupEvents();
+            await checkPermissions();
+            console.log('NorthPath v2 ready');
+        } catch (e) { console.error('Init failed:', e); showToast('Init failed', 'error'); }
+    }
+
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.error);
+    init();
+</script>
+```
+
 </body>
 </html>
