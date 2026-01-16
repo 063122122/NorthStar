@@ -24,2496 +24,1250 @@
             --accent-dim: #22c55e;
             --warning: #f59e0b;
             --danger: #ef4444;
+            --blue: #3b82f6;
             --border: #333;
             --font-display: 'Outfit', sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html, body {
-            height: 100%;
-            overflow: hidden;
-        }
-
-        body {
-            font-family: var(--font-display);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            touch-action: manipulation;
-        }
-
-        .app {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        /* Header */
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 20px;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .logo {
-            font-size: 1.4rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .logo span {
-            color: var(--accent);
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.75rem;
-            font-family: var(--font-mono);
-            color: var(--text-secondary);
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--text-muted);
-        }
-
-        .status-dot.active {
-            background: var(--accent);
-            box-shadow: 0 0 8px var(--accent);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* Navigation Tabs */
-        .nav-tabs {
-            display: flex;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .nav-tab {
-            flex: 1;
-            padding: 14px;
-            text-align: center;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            background: none;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-        }
-
-        .nav-tab.active {
-            color: var(--accent);
-        }
-
-        .nav-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 20%;
-            width: 60%;
-            height: 2px;
-            background: var(--accent);
-        }
-
-        /* Main Content */
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-
-        .view {
-            display: none;
-            padding: 20px;
-            min-height: 100%;
-        }
-
-        .view.active {
-            display: block;
-        }
-
-        /* Record View */
-        .record-view {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            gap: 30px;
-            padding-top: 40px;
-        }
-
-        .record-btn {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            border: 3px solid var(--border);
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            font-family: var(--font-display);
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .record-btn svg {
-            width: 32px;
-            height: 32px;
-        }
-
-        .record-btn:hover {
-            border-color: var(--accent);
-            transform: scale(1.02);
-        }
-
-        .record-btn.recording {
-            border-color: var(--danger);
-            background: rgba(239, 68, 68, 0.1);
-            animation: recording-pulse 1.5s infinite;
-        }
-
-        @keyframes recording-pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            50% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
-        }
-
-        .record-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            width: 100%;
-            max-width: 320px;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-family: var(--font-mono);
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: var(--accent);
-        }
-
-        .stat-label {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 4px;
-        }
-
-        .gps-accuracy {
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            padding: 8px 16px;
-            background: var(--bg-tertiary);
-            border-radius: 20px;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; overflow: hidden; }
+        body { font-family: var(--font-display); background: var(--bg-primary); color: var(--text-primary); touch-action: manipulation; }
+        .app { display: flex; flex-direction: column; height: 100%; max-width: 500px; margin: 0 auto; }
+        .header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); }
+        .logo { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.5px; }
+        .logo span { color: var(--accent); }
+        .header-actions { display: flex; gap: 8px; align-items: center; }
+        .header-btn { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-tertiary); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .header-btn:hover, .header-btn.active { border-color: var(--accent); color: var(--accent); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
+        .status-dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .nav-tabs { display: flex; background: var(--bg-secondary); border-bottom: 1px solid var(--border); overflow-x: auto; }
+        .nav-tab { flex: 1; min-width: max-content; padding: 12px 10px; text-align: center; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); background: none; border: none; cursor: pointer; position: relative; white-space: nowrap; }
+        .nav-tab.active { color: var(--accent); }
+        .nav-tab.active::after { content: ''; position: absolute; bottom: 0; left: 20%; width: 60%; height: 2px; background: var(--accent); }
+        .content { flex: 1; overflow-y: auto; overflow-x: hidden; }
+        .view { display: none; padding: 16px; min-height: 100%; }
+        .view.active { display: block; }
+        .record-view { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; padding-top: 16px; }
+        .record-btn { width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-family: var(--font-display); font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+        .record-btn svg { width: 26px; height: 26px; }
+        .record-btn:hover { border-color: var(--accent); }
+        .record-btn.recording { border-color: var(--danger); background: rgba(239, 68, 68, 0.1); animation: rec-pulse 1.5s infinite; }
+        @keyframes rec-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 50% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } }
+        .record-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; max-width: 280px; }
+        .stat { text-align: center; }
+        .stat-value { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 600; color: var(--accent); }
+        .stat-label { font-size: 0.6rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+        .gps-accuracy { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); padding: 5px 12px; background: var(--bg-tertiary); border-radius: 20px; }
         .gps-accuracy.good { color: var(--accent); }
         .gps-accuracy.medium { color: var(--warning); }
         .gps-accuracy.poor { color: var(--danger); }
-
-        /* Routes View */
-        .routes-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .routes-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .routes-count {
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .route-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .route-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .route-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        .route-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-
-        .route-name {
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        .route-date {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            color: var(--text-muted);
-        }
-
-        .route-meta {
-            display: flex;
-            gap: 16px;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .route-meta span {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-secondary);
-        }
-
-        .empty-state svg {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
-
-        .empty-state p {
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
-
-        /* Navigate View */
-        .navigate-view {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .destination-selector {
-            margin-bottom: 20px;
-        }
-
-        .destination-label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .destination-dropdown {
-            width: 100%;
-            padding: 14px 16px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-family: var(--font-display);
-            font-size: 1rem;
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6,9 12,15 18,9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-        }
-
-        .destination-dropdown:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .compass-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 24px;
-        }
-
-        .compass {
-            width: 240px;
-            height: 240px;
-            border-radius: 50%;
-            border: 3px solid var(--border);
-            background: var(--bg-secondary);
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .compass-ring {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-        }
-
-        .compass-arrow {
-            width: 40px;
-            height: 110px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            margin-left: -20px;
-            margin-top: -55px;
-            filter: drop-shadow(0 0 10px var(--accent));
-            transform-origin: center center;
-            /* Arrow stays fixed - always points up */
-        }
-        
-        .compass-arrow::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 16px solid transparent;
-            border-right: 16px solid transparent;
-            border-bottom: 50px solid var(--accent);
-        }
-        
-        .compass-arrow::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 35px solid var(--text-muted);
-        }
-        
-        .compass-directions {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            font-family: var(--font-mono);
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            transition: transform 0.15s ease-out;
-        }
-
-        .compass-center {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--bg-primary);
-            border: 3px solid var(--accent);
-        }
-
-        .compass-directions {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        .compass-directions span {
-            position: absolute;
-        }
-
-        .compass-directions .n { top: 12px; left: 50%; transform: translateX(-50%); color: var(--accent); font-size: 1rem; }
-        .compass-directions .e { right: 12px; top: 50%; transform: translateY(-50%); }
-        .compass-directions .s { bottom: 12px; left: 50%; transform: translateX(-50%); }
-        .compass-directions .w { left: 12px; top: 50%; transform: translateY(-50%); }
-
-        .nav-info {
-            text-align: center;
-        }
-
-        .nav-distance {
-            font-family: var(--font-mono);
-            font-size: 2.5rem;
-            font-weight: 600;
-            color: var(--accent);
-        }
-
-        .nav-distance-unit {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            margin-left: 4px;
-        }
-
-        .nav-destination {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
-
-        .nav-eta {
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 8px;
-        }
-
-        .no-destination {
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .calibrate-btn {
-            padding: 16px 32px;
-            background: var(--accent);
-            color: var(--bg-primary);
-            border: none;
-            border-radius: 12px;
-            font-family: var(--font-display);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            animation: pulse-btn 2s infinite;
-        }
-
-        @keyframes pulse-btn {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); }
-            50% { box-shadow: 0 0 0 15px rgba(74, 222, 128, 0); }
-        }
-
-        .nav-hint {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            text-align: center;
-            margin-top: 16px;
-            padding: 12px 16px;
-            background: var(--bg-secondary);
-            border-radius: 10px;
-            line-height: 1.5;
-        }
-
-        .nav-hint strong {
-            color: var(--accent);
-        }
-
-        .compass-status {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-align: center;
-            margin-top: 8px;
-        }
-
-        .compass-status.active {
-            color: var(--accent);
-        }
-
-        .instruction-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 16px;
-        }
-
-        .instruction-card h4 {
-            font-size: 0.9rem;
-            color: var(--accent);
-            margin-bottom: 8px;
-        }
-
-        .instruction-card p {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-
-        /* Data View */
-        .data-view {
-            padding: 10px 0;
-        }
-
-        .data-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin: 24px 0;
-        }
-
-        .data-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 18px 24px;
-            border-radius: 12px;
-            border: 2px solid var(--border);
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            font-family: var(--font-display);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .data-btn:hover {
-            border-color: var(--accent);
-        }
-
-        .data-btn.export {
-            background: var(--accent);
-            color: var(--bg-primary);
-            border-color: var(--accent);
-        }
-
-        .data-btn.export:hover {
-            background: var(--accent-dim);
-            border-color: var(--accent-dim);
-        }
-
-        .data-btn.import {
-            border-style: dashed;
-        }
-
-        .data-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-top: 24px;
-        }
-
-        .data-stat {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 16px;
-            text-align: center;
-        }
-
-        .data-stat-value {
-            display: block;
-            font-family: var(--font-mono);
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--accent);
-        }
-
-        .data-stat-label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Places View */
-        .places-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .add-place-btn {
-            padding: 10px 16px;
-            background: var(--accent);
-            color: var(--bg-primary);
-            border: none;
-            border-radius: 8px;
-            font-family: var(--font-display);
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .add-place-btn:hover {
-            background: var(--accent-dim);
-        }
-
-        .place-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .place-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 14px 16px;
-        }
-
-        .place-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .place-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            background: var(--bg-tertiary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .place-icon svg {
-            width: 18px;
-            height: 18px;
-            color: var(--accent);
-        }
-
-        .place-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .place-routes {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-top: 2px;
-        }
-
-        .place-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .place-action-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--bg-tertiary);
-            color: var(--text-secondary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .place-action-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        .place-action-btn.danger:hover {
-            border-color: var(--danger);
-            color: var(--danger);
-        }
-
-        /* Modal */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            width: 100%;
-            max-width: 360px;
-        }
-
-        .modal-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        .modal-input {
-            width: 100%;
-            padding: 14px 16px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-family: var(--font-display);
-            font-size: 1rem;
-            margin-bottom: 20px;
-        }
-
-        .modal-input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .modal-input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 12px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 14px;
-            border-radius: 10px;
-            border: none;
-            font-family: var(--font-display);
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .modal-btn.primary {
-            background: var(--accent);
-            color: var(--bg-primary);
-        }
-
-        .modal-btn.secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-
-        /* Toast */
-        .toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 14px 24px;
-            font-size: 0.9rem;
-            opacity: 0;
-            transition: all 0.3s;
-            z-index: 200;
-        }
-
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-
-        .toast.success {
-            border-color: var(--accent);
-        }
-
-        .toast.error {
-            border-color: var(--danger);
-        }
-
-        /* Permission Prompt */
-        .permission-prompt {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: var(--bg-primary);
-            z-index: 300;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            text-align: center;
-        }
-
-        .permission-prompt.active {
-            display: flex;
-        }
-
-        .permission-prompt svg {
-            width: 80px;
-            height: 80px;
-            color: var(--accent);
-            margin-bottom: 30px;
-        }
-
-        .permission-prompt h2 {
-            font-size: 1.4rem;
-            margin-bottom: 16px;
-        }
-
-        .permission-prompt p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 30px;
-            max-width: 300px;
-        }
-
-        .permission-btn {
-            padding: 16px 48px;
-            background: var(--accent);
-            color: var(--bg-primary);
-            border: none;
-            border-radius: 12px;
-            font-family: var(--font-display);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* Utility */
-        .hidden {
-            display: none !important;
-        }
+        .mode-toggle { display: flex; gap: 6px; margin-top: 6px; }
+        .mode-btn { padding: 6px 12px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-secondary); font-family: var(--font-display); font-size: 0.7rem; cursor: pointer; }
+        .mode-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(74, 222, 128, 0.1); }
+        .navigate-view { display: flex; flex-direction: column; height: 100%; }
+        .dest-selector { margin-bottom: 12px; }
+        .dest-label { font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .dest-dropdown { width: 100%; padding: 10px 12px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-family: var(--font-display); font-size: 0.9rem; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6,9 12,15 18,9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+        .dest-dropdown:focus { outline: none; border-color: var(--accent); }
+        .trip-btns { display: flex; gap: 6px; margin-bottom: 12px; }
+        .trip-btn { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-secondary); font-family: var(--font-display); font-size: 0.7rem; cursor: pointer; }
+        .trip-btn:hover, .trip-btn.active { border-color: var(--accent); color: var(--accent); }
+        .compass-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+        .compass { width: 180px; height: 180px; border-radius: 50%; border: 3px solid var(--border); background: var(--bg-secondary); position: relative; display: flex; align-items: center; justify-content: center; }
+        .compass-dirs { position: absolute; width: 100%; height: 100%; font-family: var(--font-mono); font-size: 0.8rem; font-weight: 600; color: var(--text-muted); transition: transform 0.15s ease-out; }
+        .compass-dirs span { position: absolute; }
+        .compass-dirs .n { top: 8px; left: 50%; transform: translateX(-50%); color: var(--accent); font-size: 0.95rem; }
+        .compass-dirs .e { right: 8px; top: 50%; transform: translateY(-50%); }
+        .compass-dirs .s { bottom: 8px; left: 50%; transform: translateX(-50%); }
+        .compass-dirs .w { left: 8px; top: 50%; transform: translateY(-50%); }
+        .compass-arrow { width: 36px; height: 90px; position: absolute; top: 50%; left: 50%; margin-left: -18px; margin-top: -45px; filter: drop-shadow(0 0 8px var(--accent)); }
+        .compass-arrow::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 40px solid var(--accent); }
+        .compass-arrow::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 28px solid var(--text-muted); }
+        .compass-center { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: var(--bg-primary); border: 2px solid var(--accent); }
+        .nav-info { text-align: center; width: 100%; }
+        .nav-dist { font-family: var(--font-mono); font-size: 2rem; font-weight: 600; color: var(--accent); }
+        .nav-dist-unit { font-size: 0.85rem; color: var(--text-secondary); margin-left: 3px; }
+        .nav-dest { font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px; }
+        .nav-eta { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); margin-top: 5px; }
+        .nav-hint { font-size: 0.7rem; color: var(--text-secondary); text-align: center; margin-top: 10px; padding: 8px 12px; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border); line-height: 1.4; }
+        .nav-hint strong { color: var(--accent); }
+        .compass-status { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted); text-align: center; margin-top: 5px; }
+        .compass-status.active { color: var(--accent); }
+        .no-dest { text-align: center; color: var(--text-secondary); font-size: 0.8rem; }
+        .calibrate-btn { padding: 12px 24px; background: var(--accent); color: var(--bg-primary); border: none; border-radius: 8px; font-family: var(--font-display); font-size: 0.9rem; font-weight: 600; cursor: pointer; animation: pulse-btn 2s infinite; }
+        @keyframes pulse-btn { 0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); } 50% { box-shadow: 0 0 0 12px rgba(74, 222, 128, 0); } }
+        .off-route-banner { background: rgba(245, 158, 11, 0.15); border: 1px solid var(--warning); border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.75rem; color: var(--warning); }
+        .off-route-btns { display: flex; gap: 6px; margin-top: 6px; }
+        .off-route-btn { flex: 1; padding: 6px; border-radius: 4px; border: 1px solid var(--warning); background: transparent; color: var(--warning); font-size: 0.65rem; cursor: pointer; }
+        .routes-header, .places-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .section-title { font-size: 0.95rem; font-weight: 600; }
+        .routes-count { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-secondary); }
+        .route-list, .place-list { display: flex; flex-direction: column; gap: 8px; }
+        .route-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 12px; cursor: pointer; }
+        .route-card:hover { border-color: var(--accent); }
+        .route-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .route-name { font-weight: 600; font-size: 0.9rem; }
+        .route-date { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted); }
+        .route-meta { display: flex; gap: 10px; font-size: 0.7rem; color: var(--text-secondary); flex-wrap: wrap; }
+        .route-tags { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+        .route-tag { font-size: 0.55rem; padding: 2px 6px; border-radius: 8px; background: var(--bg-tertiary); color: var(--text-secondary); }
+        .route-tag.time { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .route-tag.wet { background: rgba(59, 130, 246, 0.2); color: var(--blue); }
+        .route-tag.stairs { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .confidence { display: flex; gap: 2px; margin-left: auto; }
+        .conf-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border); }
+        .conf-dot.filled { background: var(--accent); }
+        .empty-state { text-align: center; padding: 30px 16px; color: var(--text-secondary); }
+        .empty-state svg { width: 40px; height: 40px; margin-bottom: 12px; opacity: 0.3; }
+        .empty-state p { font-size: 0.8rem; line-height: 1.4; }
+        .add-place-btn { padding: 7px 12px; background: var(--accent); color: var(--bg-primary); border: none; border-radius: 6px; font-family: var(--font-display); font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+        .place-card { display: flex; justify-content: space-between; align-items: center; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+        .place-info { display: flex; align-items: center; gap: 10px; }
+        .place-icon { width: 30px; height: 30px; border-radius: 6px; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; }
+        .place-icon svg { width: 14px; height: 14px; color: var(--accent); }
+        .place-icon.home svg { color: var(--accent); }
+        .place-icon.work svg { color: var(--blue); }
+        .place-icon.safe svg { color: var(--warning); }
+        .place-name { font-weight: 600; font-size: 0.85rem; }
+        .place-meta { font-size: 0.65rem; color: var(--text-secondary); margin-top: 1px; }
+        .place-actions { display: flex; gap: 5px; }
+        .place-action-btn { width: 30px; height: 30px; border-radius: 5px; border: 1px solid var(--border); background: var(--bg-tertiary); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .place-action-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .place-action-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+        .map-view { height: 100%; display: flex; flex-direction: column; }
+        .map-container { flex: 1; background: var(--bg-secondary); border-radius: 10px; border: 1px solid var(--border); position: relative; overflow: hidden; min-height: 250px; }
+        .map-canvas { width: 100%; height: 100%; }
+        .map-controls { display: flex; gap: 6px; margin-top: 10px; }
+        .map-ctrl-btn { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-secondary); font-size: 0.7rem; cursor: pointer; }
+        .map-ctrl-btn.active { border-color: var(--accent); color: var(--accent); }
+        .data-view { padding: 8px 0; }
+        .data-actions { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+        .data-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 18px; border-radius: 8px; border: 2px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-family: var(--font-display); font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+        .data-btn:hover { border-color: var(--accent); }
+        .data-btn.export { background: var(--accent); color: var(--bg-primary); border-color: var(--accent); }
+        .data-btn.import { border-style: dashed; }
+        .data-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+        .data-stat { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px; padding: 12px; text-align: center; }
+        .data-stat-value { display: block; font-family: var(--font-mono); font-size: 1.2rem; font-weight: 600; color: var(--accent); }
+        .data-stat-label { font-size: 0.6rem; color: var(--text-secondary); text-transform: uppercase; }
+        .settings-section { margin-top: 20px; }
+        .settings-title { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; }
+        .setting-info h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 1px; }
+        .setting-info p { font-size: 0.7rem; color: var(--text-secondary); }
+        .toggle { width: 44px; height: 24px; border-radius: 12px; background: var(--bg-tertiary); border: 1px solid var(--border); cursor: pointer; position: relative; }
+        .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--text-secondary); transition: all 0.2s; }
+        .toggle.active { background: var(--accent); border-color: var(--accent); }
+        .toggle.active::after { left: 22px; background: var(--bg-primary); }
+        .instruction-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+        .instruction-card h4 { font-size: 0.8rem; color: var(--accent); margin-bottom: 6px; }
+        .instruction-card p { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 18px; width: 100%; max-width: 320px; max-height: 80vh; overflow-y: auto; }
+        .modal-title { font-size: 1rem; font-weight: 600; margin-bottom: 14px; }
+        .modal-input { width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: var(--font-display); font-size: 0.9rem; margin-bottom: 10px; }
+        .modal-input:focus { outline: none; border-color: var(--accent); }
+        .modal-input::placeholder { color: var(--text-muted); }
+        .modal-label { font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 4px; display: block; }
+        .modal-select { width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: var(--font-display); font-size: 0.9rem; margin-bottom: 10px; }
+        .modal-row { display: flex; gap: 8px; margin-bottom: 10px; }
+        .modal-row .modal-input, .modal-row .mode-btn { flex: 1; margin-bottom: 0; }
+        .modal-buttons { display: flex; gap: 8px; margin-top: 6px; }
+        .modal-btn { flex: 1; padding: 10px; border-radius: 6px; border: none; font-family: var(--font-display); font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+        .modal-btn.primary { background: var(--accent); color: var(--bg-primary); }
+        .modal-btn.secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
+        .modal-btn.danger { background: var(--danger); color: white; }
+        .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 10px 18px; font-size: 0.8rem; opacity: 0; transition: all 0.3s; z-index: 200; max-width: 90%; text-align: center; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success { border-color: var(--accent); }
+        .toast.error { border-color: var(--danger); }
+        .toast.warning { border-color: var(--warning); }
+        .permission-prompt { display: none; position: fixed; inset: 0; background: var(--bg-primary); z-index: 300; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+        .permission-prompt.active { display: flex; }
+        .permission-prompt svg { width: 56px; height: 56px; color: var(--accent); margin-bottom: 20px; }
+        .permission-prompt h2 { font-size: 1.2rem; margin-bottom: 10px; }
+        .permission-prompt p { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.4; margin-bottom: 20px; max-width: 260px; }
+        .permission-btn { padding: 12px 36px; background: var(--accent); color: var(--bg-primary); border: none; border-radius: 8px; font-family: var(--font-display); font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <!-- Permission Prompt -->
     <div class="permission-prompt" id="permissionPrompt">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <polygon points="12,6 12,12 16,14"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="12,6 12,12 16,14"/></svg>
         <h2>Enable Location</h2>
-        <p>NorthPath needs access to your location to record routes and guide you to saved places.</p>
+        <p>NorthPath needs location access to record routes and navigate.</p>
         <button class="permission-btn" id="grantPermission">Enable Location</button>
     </div>
-
-    <!-- Main App -->
     <div class="app">
         <header class="header">
             <div class="logo">North<span>Path</span></div>
-            <div class="status-indicator">
+            <div class="header-actions">
+                <button class="header-btn" id="panicBtn" title="Get Home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></button>
                 <div class="status-dot" id="statusDot"></div>
-                <span id="statusText">Ready</span>
             </div>
         </header>
-
         <nav class="nav-tabs">
             <button class="nav-tab active" data-view="record">Record</button>
             <button class="nav-tab" data-view="navigate">Navigate</button>
             <button class="nav-tab" data-view="routes">Routes</button>
             <button class="nav-tab" data-view="places">Places</button>
+            <button class="nav-tab" data-view="map">Map</button>
             <button class="nav-tab" data-view="data">Data</button>
         </nav>
-
         <main class="content">
-            <!-- Record View -->
             <div class="view active" id="recordView">
                 <div class="record-view">
                     <div class="gps-accuracy" id="gpsAccuracy">GPS: Waiting...</div>
-                    
-                    <button class="record-btn" id="recordBtn">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <circle cx="12" cy="12" r="8"/>
-                        </svg>
-                        <span id="recordBtnText">Start</span>
-                    </button>
-
+                    <button class="record-btn" id="recordBtn"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg><span id="recordBtnText">Start</span></button>
                     <div class="record-stats">
-                        <div class="stat">
-                            <div class="stat-value" id="statDistance">0.0</div>
-                            <div class="stat-label">km</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value" id="statDuration">0:00</div>
-                            <div class="stat-label">Time</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value" id="statPoints">0</div>
-                            <div class="stat-label">Points</div>
-                        </div>
+                        <div class="stat"><div class="stat-value" id="statDistance">0.0</div><div class="stat-label">km</div></div>
+                        <div class="stat"><div class="stat-value" id="statDuration">0:00</div><div class="stat-label">Time</div></div>
+                        <div class="stat"><div class="stat-value" id="statPoints">0</div><div class="stat-label">Points</div></div>
                     </div>
-                    
-                    <div class="instruction-card" id="recordInstructions">
-                        <h4>Record Your Routes</h4>
-                        <p>Tap <strong>Start</strong> before walking.<br>
-                        Tap again to <strong>Stop</strong> and save.<br>
-                        The more routes you record, the smarter navigation becomes!</p>
+                    <div class="mode-toggle">
+                        <button class="mode-btn active" data-mode="normal">Normal</button>
+                        <button class="mode-btn" data-mode="explore">Explore</button>
+                        <button class="mode-btn" data-mode="breadcrumb">Breadcrumb</button>
+                    </div>
+                    <div class="instruction-card">
+                        <h4>Recording Modes</h4>
+                        <p><strong>Normal:</strong> Save as named route<br><strong>Explore:</strong> Auto-merge new paths<br><strong>Breadcrumb:</strong> Retrace steps back</p>
                     </div>
                 </div>
             </div>
-
-            <!-- Navigate View -->
             <div class="view" id="navigateView">
                 <div class="navigate-view">
-                    <div class="destination-selector">
-                        <div class="destination-label">NAVIGATE TO</div>
-                        <select class="destination-dropdown" id="destinationSelect">
-                            <option value="">Choose a saved place...</option>
-                        </select>
+                    <div class="off-route-banner hidden" id="offRouteBanner">Off recorded route<div class="off-route-btns"><button class="off-route-btn" id="offRouteRecord">Record New</button><button class="off-route-btn" id="offRouteRejoin">Rejoin</button></div></div>
+                    <div class="dest-selector">
+                        <div class="dest-label">NAVIGATE TO</div>
+                        <select class="dest-dropdown" id="destinationSelect"><option value="">Choose a place...</option></select>
                     </div>
-
+                    <div class="trip-btns">
+                        <button class="trip-btn" id="tripNearest">Nearest</button>
+                        <button class="trip-btn" id="tripMulti">Multi-Stop</button>
+                        <button class="trip-btn" id="tripFlat">No Stairs</button>
+                    </div>
                     <div class="compass-container" id="compassContainer">
-                        <div class="no-destination" id="noDestination">
-                            <div class="instruction-card">
-                                <h4>How to Navigate</h4>
-                                <p>1. Save a place in the <strong>Places</strong> tab<br>
-                                2. Select it from the dropdown above<br>
-                                3. Rotate your body until <strong>N is at the top</strong><br>
-                                4. Walk forward — you're heading the right way!</p>
-                            </div>
-                        </div>
-
-                        <button class="calibrate-btn hidden" id="calibrateBtn">
-                            📍 Tap to Enable Compass
-                        </button>
-                        
+                        <div class="no-dest" id="noDestination"><div class="instruction-card"><h4>How to Navigate</h4><p>1. Save places in <strong>Places</strong> tab<br>2. Select from dropdown<br>3. Rotate until <strong>N is up</strong><br>4. Walk forward!</p></div></div>
+                        <button class="calibrate-btn hidden" id="calibrateBtn">Enable Compass</button>
                         <div class="compass hidden" id="compass">
-                            <div class="compass-directions">
-                                <span class="n">N</span>
-                                <span class="e">E</span>
-                                <span class="s">S</span>
-                                <span class="w">W</span>
-                            </div>
-                            <div class="compass-arrow" id="compassArrow"></div>
+                            <div class="compass-dirs"><span class="n">N</span><span class="e">E</span><span class="s">S</span><span class="w">W</span></div>
+                            <div class="compass-arrow"></div>
                             <div class="compass-center"></div>
                         </div>
-
                         <div class="nav-info hidden" id="navInfo">
-                            <div class="nav-distance">
-                                <span id="navDistanceValue">0.0</span>
-                                <span class="nav-distance-unit" id="navDistanceUnit">km</span>
-                            </div>
-                            <div class="nav-destination" id="navDestination">--</div>
+                            <div class="nav-dist"><span id="navDistanceValue">0</span><span class="nav-dist-unit" id="navDistanceUnit">m</span></div>
+                            <div class="nav-dest" id="navDestination">--</div>
                             <div class="nav-eta" id="navEta">ETA: --</div>
-                            <div class="nav-hint" id="navHint">
-                                <strong>↑ Rotate until N is at the top</strong><br>
-                                Then walk forward
-                            </div>
+                            <div class="nav-hint" id="navHint"><strong>Rotate until N is up</strong><br>Then walk forward</div>
                             <div class="compass-status" id="compassStatus">Compass: waiting...</div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Routes View -->
             <div class="view" id="routesView">
-                <div class="routes-header">
-                    <span class="routes-title">Saved Routes</span>
-                    <span class="routes-count" id="routesCount">0 routes</span>
-                </div>
-                <div class="route-list" id="routeList">
-                    <div class="empty-state" id="routesEmpty">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 2L12 22M2 12L22 12M5 5L19 19M19 5L5 19"/>
-                        </svg>
-                        <p>No routes recorded yet.<br>Start walking to build your personal map!</p>
-                    </div>
-                </div>
+                <div class="routes-header"><span class="section-title">Saved Routes</span><span class="routes-count" id="routesCount">0 routes</span></div>
+                <div class="route-list" id="routeList"><div class="empty-state" id="routesEmpty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg><p>No routes yet. Start recording!</p></div></div>
             </div>
-
-            <!-- Places View -->
             <div class="view" id="placesView">
-                <div class="places-header">
-                    <span class="routes-title">Saved Places</span>
-                    <button class="add-place-btn" id="addPlaceBtn">+ Add Current</button>
-                </div>
-                <div class="place-list" id="placeList">
-                    <div class="empty-state" id="placesEmpty">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                            <circle cx="12" cy="10" r="3"/>
-                        </svg>
-                        <p><strong>Save your favourite places</strong><br><br>
-                        Go to a location you visit often (home, work, shops, etc.) then tap <strong>+ Add Current</strong> to save it.<br><br>
-                        You can then navigate back to these places from anywhere!</p>
-                    </div>
+                <div class="places-header"><span class="section-title">Saved Places</span><button class="add-place-btn" id="addPlaceBtn">+ Add</button></div>
+                <div class="place-list" id="placeList"><div class="empty-state" id="placesEmpty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><p>No places saved. Tap <strong>+ Add</strong> at a location.</p></div></div>
+            </div>
+            <div class="view" id="mapView">
+                <div class="map-view">
+                    <div class="map-container"><canvas class="map-canvas" id="mapCanvas"></canvas></div>
+                    <div class="map-controls"><button class="map-ctrl-btn active" id="mapRoutes">Routes</button><button class="map-ctrl-btn" id="mapPlaces">Places</button><button class="map-ctrl-btn" id="mapLive">Live</button><button class="map-ctrl-btn" id="mapFit">Fit</button></div>
                 </div>
             </div>
-
-            <!-- Data View -->
             <div class="view" id="dataView">
                 <div class="data-view">
-                    <div class="instruction-card">
-                        <h4>Your Walker Data</h4>
-                        <p>Export your routes and places to keep a backup. Import to restore after updates.</p>
-                    </div>
-
+                    <div class="instruction-card"><h4>Walker Data</h4><p>Export to backup. Import to restore.</p></div>
                     <div class="data-actions">
-                        <button class="data-btn export" id="exportDataBtn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-                            </svg>
-                            <span>Download WalkerData</span>
-                        </button>
-
-                        <button class="data-btn import" id="importDataBtn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
-                            </svg>
-                            <span>Upload WalkerData</span>
-                        </button>
-
-                        <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                        <button class="data-btn export" id="exportBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Download</button>
+                        <button class="data-btn import" id="importBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>Upload</button>
+                        <input type="file" id="importFile" accept=".json" style="display:none">
                     </div>
-
-                    <div class="data-stats" id="dataStats">
-                        <div class="data-stat">
-                            <span class="data-stat-value" id="totalRoutes">0</span>
-                            <span class="data-stat-label">Routes</span>
-                        </div>
-                        <div class="data-stat">
-                            <span class="data-stat-value" id="totalPlaces">0</span>
-                            <span class="data-stat-label">Places</span>
-                        </div>
-                        <div class="data-stat">
-                            <span class="data-stat-value" id="totalPoints">0</span>
-                            <span class="data-stat-label">GPS Points</span>
-                        </div>
+                    <div class="data-stats"><div class="data-stat"><span class="data-stat-value" id="totalRoutes">0</span><span class="data-stat-label">Routes</span></div><div class="data-stat"><span class="data-stat-value" id="totalPlaces">0</span><span class="data-stat-label">Places</span></div><div class="data-stat"><span class="data-stat-value" id="totalPoints">0</span><span class="data-stat-label">Points</span></div></div>
+                    <div class="settings-section">
+                        <div class="settings-title">Preferences</div>
+                        <div class="setting-item"><div class="setting-info"><h4>Avoid Wet Routes</h4><p>Skip slippery paths</p></div><div class="toggle" id="toggleWet"></div></div>
+                        <div class="setting-item"><div class="setting-info"><h4>Prefer Flat Routes</h4><p>Avoid stairs</p></div><div class="toggle" id="toggleFlat"></div></div>
+                        <div class="setting-item"><div class="setting-info"><h4>Learn Patterns</h4><p>Suggest frequent destinations</p></div><div class="toggle active" id="togglePatterns"></div></div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
-
-    <!-- Save Route Modal -->
     <div class="modal-overlay" id="saveRouteModal">
         <div class="modal">
             <h3 class="modal-title">Save Route</h3>
-            <input type="text" class="modal-input" id="routeNameInput" placeholder="Route name (e.g., Home to Work)">
-            <div class="modal-buttons">
-                <button class="modal-btn secondary" id="cancelSaveRoute">Cancel</button>
-                <button class="modal-btn primary" id="confirmSaveRoute">Save</button>
-            </div>
+            <input type="text" class="modal-input" id="routeNameInput" placeholder="Route name">
+            <label class="modal-label">Time Restrictions</label>
+            <div class="modal-row"><input type="time" class="modal-input" id="routeTimeStart"><input type="time" class="modal-input" id="routeTimeEnd"></div>
+            <label class="modal-label">Conditions</label>
+            <div class="modal-row"><button class="mode-btn" id="tagWet">Avoid wet</button><button class="mode-btn" id="tagDark">Avoid dark</button></div>
+            <div class="modal-buttons"><button class="modal-btn secondary" id="cancelRoute">Cancel</button><button class="modal-btn primary" id="saveRoute">Save</button></div>
         </div>
     </div>
-
-    <!-- Save Place Modal -->
     <div class="modal-overlay" id="savePlaceModal">
         <div class="modal">
-            <h3 class="modal-title">Save This Place</h3>
-            <input type="text" class="modal-input" id="placeNameInput" placeholder="Place name (e.g., Home, Work, Gym)">
-            <div class="modal-buttons">
-                <button class="modal-btn secondary" id="cancelSavePlace">Cancel</button>
-                <button class="modal-btn primary" id="confirmSavePlace">Save</button>
-            </div>
+            <h3 class="modal-title">Save Place</h3>
+            <input type="text" class="modal-input" id="placeNameInput" placeholder="Place name">
+            <label class="modal-label">Type</label>
+            <select class="modal-select" id="placeType"><option value="default">Default</option><option value="home">Home</option><option value="work">Work</option><option value="safe">Safe Place</option></select>
+            <label class="modal-label">Note</label>
+            <input type="text" class="modal-input" id="placeNote" placeholder="Optional note">
+            <div class="modal-buttons"><button class="modal-btn secondary" id="cancelPlace">Cancel</button><button class="modal-btn primary" id="savePlace">Save</button></div>
         </div>
     </div>
-
-    <!-- Toast -->
+    <div class="modal-overlay" id="multiStopModal">
+        <div class="modal">
+            <h3 class="modal-title">Plan Trip</h3>
+            <p style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:12px">Select places in order:</p>
+            <div id="multiStopList" style="max-height:180px;overflow-y:auto"></div>
+            <div class="modal-buttons"><button class="modal-btn secondary" id="cancelMulti">Cancel</button><button class="modal-btn primary" id="startMulti">Start</button></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="routeDetailModal">
+        <div class="modal">
+            <h3 class="modal-title" id="routeDetailName">Route</h3>
+            <div id="routeDetailContent"></div>
+            <div class="modal-buttons"><button class="modal-btn secondary" id="closeDetail">Close</button><button class="modal-btn danger" id="deleteDetail">Delete</button></div>
+        </div>
+    </div>
     <div class="toast" id="toast"></div>
-
     <script>
         // ============================================
-        // NorthPath - Personal Route Intelligence System
+        // NorthPath v2 - Complete Navigation System
         // ============================================
-
-        // Database Configuration
         const DB_NAME = 'NorthPathDB';
-        const DB_VERSION = 1;
+        const DB_VERSION = 3;
         let db = null;
 
-        // App State
         const state = {
             isRecording: false,
+            recordingMode: 'normal',
             currentRoute: [],
             recordingStartTime: null,
+            breadcrumbReturn: [],
             watchId: null,
-            compassWatchId: null,
             currentPosition: null,
             deviceHeading: null,
+            lastPositions: [],
             selectedDestination: null,
             activeRoute: null,
             currentWaypointIndex: 0,
-            needsCompassPermission: false,
+            isOffRoute: false,
+            multiStopTrip: [],
+            currentTripIndex: 0,
             places: [],
             routes: [],
-            routeMesh: null
+            segments: [],
+            routeMesh: null,
+            patterns: [],
+            needsCompassPermission: false,
+            targetBearing: null,
+            routeTags: { avoidWet: false, avoidDark: false },
+            settings: { avoidWet: false, preferFlat: false, learnPatterns: true },
+            durationInterval: null,
+            showRoutes: true,
+            showPlaces: true,
+            showLive: true
         };
 
-        // DOM Elements
-        const elements = {
-            permissionPrompt: document.getElementById('permissionPrompt'),
-            grantPermission: document.getElementById('grantPermission'),
-            statusDot: document.getElementById('statusDot'),
-            statusText: document.getElementById('statusText'),
-            gpsAccuracy: document.getElementById('gpsAccuracy'),
-            recordBtn: document.getElementById('recordBtn'),
-            recordBtnText: document.getElementById('recordBtnText'),
-            statDistance: document.getElementById('statDistance'),
-            statDuration: document.getElementById('statDuration'),
-            statPoints: document.getElementById('statPoints'),
-            destinationSelect: document.getElementById('destinationSelect'),
-            compass: document.getElementById('compass'),
-            compassArrow: document.getElementById('compassArrow'),
-            compassDirections: document.querySelector('.compass-directions'),
-            navInfo: document.getElementById('navInfo'),
-            noDestination: document.getElementById('noDestination'),
-            calibrateBtn: document.getElementById('calibrateBtn'),
-            navDistanceValue: document.getElementById('navDistanceValue'),
-            navDistanceUnit: document.getElementById('navDistanceUnit'),
-            navDestination: document.getElementById('navDestination'),
-            navEta: document.getElementById('navEta'),
-            navHint: document.getElementById('navHint'),
-            compassStatus: document.getElementById('compassStatus'),
-            routeList: document.getElementById('routeList'),
-            routesCount: document.getElementById('routesCount'),
-            routesEmpty: document.getElementById('routesEmpty'),
-            placeList: document.getElementById('placeList'),
-            placesEmpty: document.getElementById('placesEmpty'),
-            addPlaceBtn: document.getElementById('addPlaceBtn'),
-            saveRouteModal: document.getElementById('saveRouteModal'),
-            savePlaceModal: document.getElementById('savePlaceModal'),
-            routeNameInput: document.getElementById('routeNameInput'),
-            placeNameInput: document.getElementById('placeNameInput'),
-            toast: document.getElementById('toast')
-        };
+        const el = {};
+
+        function initElements() {
+            el.permissionPrompt = document.getElementById('permissionPrompt');
+            el.grantPermission = document.getElementById('grantPermission');
+            el.statusDot = document.getElementById('statusDot');
+            el.gpsAccuracy = document.getElementById('gpsAccuracy');
+            el.recordBtn = document.getElementById('recordBtn');
+            el.recordBtnText = document.getElementById('recordBtnText');
+            el.statDistance = document.getElementById('statDistance');
+            el.statDuration = document.getElementById('statDuration');
+            el.statPoints = document.getElementById('statPoints');
+            el.destinationSelect = document.getElementById('destinationSelect');
+            el.compass = document.getElementById('compass');
+            el.compassDirs = document.querySelector('.compass-dirs');
+            el.navInfo = document.getElementById('navInfo');
+            el.noDestination = document.getElementById('noDestination');
+            el.navDistanceValue = document.getElementById('navDistanceValue');
+            el.navDistanceUnit = document.getElementById('navDistanceUnit');
+            el.navDestination = document.getElementById('navDestination');
+            el.navEta = document.getElementById('navEta');
+            el.navHint = document.getElementById('navHint');
+            el.compassStatus = document.getElementById('compassStatus');
+            el.routeList = document.getElementById('routeList');
+            el.routesCount = document.getElementById('routesCount');
+            el.routesEmpty = document.getElementById('routesEmpty');
+            el.placeList = document.getElementById('placeList');
+            el.placesEmpty = document.getElementById('placesEmpty');
+            el.addPlaceBtn = document.getElementById('addPlaceBtn');
+            el.saveRouteModal = document.getElementById('saveRouteModal');
+            el.savePlaceModal = document.getElementById('savePlaceModal');
+            el.routeNameInput = document.getElementById('routeNameInput');
+            el.placeNameInput = document.getElementById('placeNameInput');
+            el.toast = document.getElementById('toast');
+            el.calibrateBtn = document.getElementById('calibrateBtn');
+            el.offRouteBanner = document.getElementById('offRouteBanner');
+            el.mapCanvas = document.getElementById('mapCanvas');
+            el.panicBtn = document.getElementById('panicBtn');
+        }
 
         // ============================================
-        // IndexedDB Setup
+        // IndexedDB
         // ============================================
-
         async function initDB() {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    db = request.result;
-                    resolve(db);
-                };
-
-                request.onupgradeneeded = (event) => {
-                    const database = event.target.result;
-
-                    // Routes store
-                    if (!database.objectStoreNames.contains('routes')) {
-                        const routeStore = database.createObjectStore('routes', { keyPath: 'id', autoIncrement: true });
-                        routeStore.createIndex('name', 'name', { unique: false });
-                        routeStore.createIndex('timestamp', 'timestamp', { unique: false });
-                    }
-
-                    // Places store
-                    if (!database.objectStoreNames.contains('places')) {
-                        const placeStore = database.createObjectStore('places', { keyPath: 'id', autoIncrement: true });
-                        placeStore.createIndex('name', 'name', { unique: false });
-                    }
-
-                    // Route mesh store (for the intelligent routing)
-                    if (!database.objectStoreNames.contains('mesh')) {
-                        database.createObjectStore('mesh', { keyPath: 'id' });
-                    }
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onerror = () => reject(req.error);
+                req.onsuccess = () => { db = req.result; resolve(db); };
+                req.onupgradeneeded = (e) => {
+                    const d = e.target.result;
+                    if (!d.objectStoreNames.contains('routes')) d.createObjectStore('routes', { keyPath: 'id', autoIncrement: true });
+                    if (!d.objectStoreNames.contains('places')) d.createObjectStore('places', { keyPath: 'id', autoIncrement: true });
+                    if (!d.objectStoreNames.contains('segments')) d.createObjectStore('segments', { keyPath: 'id', autoIncrement: true });
+                    if (!d.objectStoreNames.contains('patterns')) d.createObjectStore('patterns', { keyPath: 'id', autoIncrement: true });
+                    if (!d.objectStoreNames.contains('mesh')) d.createObjectStore('mesh', { keyPath: 'id' });
+                    if (!d.objectStoreNames.contains('settings')) d.createObjectStore('settings', { keyPath: 'key' });
                 };
             });
         }
 
-        // Generic DB operations
-        async function dbAdd(storeName, data) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction(storeName, 'readwrite');
-                const store = transaction.objectStore(storeName);
-                const request = store.add(data);
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
+        async function dbAdd(store, data) {
+            return new Promise((res, rej) => {
+                const tx = db.transaction(store, 'readwrite');
+                const req = tx.objectStore(store).add(data);
+                req.onsuccess = () => res(req.result);
+                req.onerror = () => rej(req.error);
             });
         }
 
-        async function dbGetAll(storeName) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction(storeName, 'readonly');
-                const store = transaction.objectStore(storeName);
-                const request = store.getAll();
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
+        async function dbGetAll(store) {
+            return new Promise((res, rej) => {
+                const tx = db.transaction(store, 'readonly');
+                const req = tx.objectStore(store).getAll();
+                req.onsuccess = () => res(req.result);
+                req.onerror = () => rej(req.error);
             });
         }
 
-        async function dbDelete(storeName, id) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction(storeName, 'readwrite');
-                const store = transaction.objectStore(storeName);
-                const request = store.delete(id);
-                request.onsuccess = () => resolve();
-                request.onerror = () => reject(request.error);
+        async function dbDelete(store, id) {
+            return new Promise((res, rej) => {
+                const tx = db.transaction(store, 'readwrite');
+                const req = tx.objectStore(store).delete(id);
+                req.onsuccess = () => res();
+                req.onerror = () => rej(req.error);
             });
         }
 
-        async function dbPut(storeName, data) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction(storeName, 'readwrite');
-                const store = transaction.objectStore(storeName);
-                const request = store.put(data);
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
+        async function dbPut(store, data) {
+            return new Promise((res, rej) => {
+                const tx = db.transaction(store, 'readwrite');
+                const req = tx.objectStore(store).put(data);
+                req.onsuccess = () => res(req.result);
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        async function dbGet(store, key) {
+            return new Promise((res, rej) => {
+                const tx = db.transaction(store, 'readonly');
+                const req = tx.objectStore(store).get(key);
+                req.onsuccess = () => res(req.result);
+                req.onerror = () => rej(req.error);
             });
         }
 
         // ============================================
         // Geolocation & Compass
         // ============================================
-
         async function checkPermissions() {
-            if (!navigator.geolocation) {
-                showToast('Geolocation not supported', 'error');
-                return false;
-            }
-
+            if (!navigator.geolocation) { showToast('No GPS', 'error'); return false; }
             try {
-                const permission = await navigator.permissions.query({ name: 'geolocation' });
-                if (permission.state === 'granted') {
-                    elements.permissionPrompt.classList.remove('active');
+                const perm = await navigator.permissions.query({ name: 'geolocation' });
+                if (perm.state === 'granted') {
+                    el.permissionPrompt.classList.remove('active');
                     startLocationWatch();
                     return true;
-                } else if (permission.state === 'prompt') {
-                    elements.permissionPrompt.classList.add('active');
-                    return false;
-                } else {
-                    showToast('Location permission denied', 'error');
-                    return false;
                 }
-            } catch (e) {
-                // Permissions API not supported, try direct access
-                elements.permissionPrompt.classList.add('active');
-                return false;
-            }
+            } catch (e) {}
+            el.permissionPrompt.classList.add('active');
+            return false;
         }
 
         function requestLocation() {
             navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    elements.permissionPrompt.classList.remove('active');
-                    startLocationWatch();
-                    updatePosition(position);
-                },
-                (error) => {
-                    showToast('Could not get location: ' + error.message, 'error');
-                },
+                (pos) => { el.permissionPrompt.classList.remove('active'); startLocationWatch(); updatePosition(pos); },
+                (err) => showToast('Location error', 'error'),
                 { enableHighAccuracy: true }
             );
         }
 
         function startLocationWatch() {
             if (state.watchId) return;
-
-            state.watchId = navigator.geolocation.watchPosition(
-                updatePosition,
-                (error) => {
-                    console.error('Location error:', error);
-                    updateGPSStatus(null);
-                },
-                {
-                    enableHighAccuracy: true,
-                    maximumAge: 5000,
-                    timeout: 10000
+            state.watchId = navigator.geolocation.watchPosition(updatePosition, () => updateGPSStatus(null), { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 });
+            if (window.DeviceOrientationEvent) {
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    state.needsCompassPermission = true;
+                } else {
+                    window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+                    window.addEventListener('deviceorientation', handleOrientation, true);
                 }
-            );
-
-            // Start compass if available
-            startCompass();
-        }
-
-        async function startCompass() {
-            if (!window.DeviceOrientationEvent) {
-                console.log('DeviceOrientation not supported');
-                return;
-            }
-
-            // Check for iOS 13+ permission requirement
-            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                // iOS - need user gesture, show button
-                state.needsCompassPermission = true;
-            } else {
-                // Android/other - just add listener
-                window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-                window.addEventListener('deviceorientation', handleOrientation, true);
             }
         }
 
         async function requestCompassPermission() {
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
                 try {
-                    const response = await DeviceOrientationEvent.requestPermission();
-                    if (response === 'granted') {
+                    const resp = await DeviceOrientationEvent.requestPermission();
+                    if (resp === 'granted') {
                         window.addEventListener('deviceorientation', handleOrientation, true);
                         state.needsCompassPermission = false;
-                        elements.calibrateBtn.classList.add('hidden');
+                        el.calibrateBtn.classList.add('hidden');
                         showToast('Compass enabled!', 'success');
-                    } else {
-                        showToast('Compass permission denied', 'error');
                     }
-                } catch (e) {
-                    console.error('Compass permission error:', e);
-                    showToast('Could not enable compass', 'error');
-                }
+                } catch (e) { showToast('Permission denied', 'error'); }
             }
         }
 
         function updatePosition(position) {
             const { latitude, longitude, accuracy, heading, speed, altitude, altitudeAccuracy } = position.coords;
-            
-            state.currentPosition = {
-                lat: latitude,
-                lng: longitude,
-                alt: altitude,
-                accuracy: accuracy,
-                altAccuracy: altitudeAccuracy,
-                heading: heading,
-                speed: speed,
-                timestamp: position.timestamp
-            };
-
+            const newPos = { lat: latitude, lng: longitude, alt: altitude, accuracy, altAccuracy: altitudeAccuracy, heading, speed, timestamp: position.timestamp };
+            state.lastPositions.push(newPos);
+            if (state.lastPositions.length > 10) state.lastPositions.shift();
+            state.currentPosition = newPos;
             updateGPSStatus(accuracy, altitude);
-
-            // If recording, add point to route
             if (state.isRecording) {
-                addRoutePoint(state.currentPosition);
+                addRoutePoint(newPos);
+                if (state.recordingMode === 'breadcrumb') state.breadcrumbReturn = [...state.currentRoute];
             }
-
-            // Update navigation if active
-            if (state.selectedDestination) {
-                updateNavigation();
-            }
+            if (state.selectedDestination) updateNavigation();
+            if (state.settings.learnPatterns) checkPatterns();
         }
 
         function handleOrientation(event) {
-            let heading = null;
-            
-            // iOS provides webkitCompassHeading (degrees from north)
-            if (event.webkitCompassHeading !== undefined) {
-                heading = event.webkitCompassHeading;
-            } 
-            // Android with absolute orientation
-            else if (event.absolute && event.alpha !== null) {
-                heading = (360 - event.alpha) % 360;
-            }
-            // Fallback for non-absolute
-            else if (event.alpha !== null) {
-                heading = (360 - event.alpha) % 360;
-            }
-            
-            if (heading !== null && !isNaN(heading)) {
-                state.deviceHeading = heading;
-                
-                // Update compass status indicator
-                if (elements.compassStatus) {
-                    elements.compassStatus.textContent = `Compass: ${Math.round(heading)}°`;
-                    elements.compassStatus.classList.add('active');
-                }
-                
-                // Update compass if navigating
-                if (state.selectedDestination) {
-                    updateCompassArrow();
-                }
+            let h = null;
+            if (event.webkitCompassHeading !== undefined) h = event.webkitCompassHeading;
+            else if (event.alpha !== null) h = (360 - event.alpha) % 360;
+            if (h !== null && !isNaN(h)) {
+                state.deviceHeading = h;
+                if (el.compassStatus) { el.compassStatus.textContent = `Compass: ${Math.round(h)}°`; el.compassStatus.classList.add('active'); }
+                if (state.selectedDestination) updateCompassArrow();
             }
         }
 
         function updateGPSStatus(accuracy, altitude) {
             if (accuracy === null) {
-                elements.gpsAccuracy.textContent = 'GPS: No signal';
-                elements.gpsAccuracy.className = 'gps-accuracy poor';
-                elements.statusDot.classList.remove('active');
-                elements.statusText.textContent = 'No GPS';
+                el.gpsAccuracy.textContent = 'GPS: No signal';
+                el.gpsAccuracy.className = 'gps-accuracy poor';
+                el.statusDot.classList.remove('active');
                 return;
             }
-
-            let status, className;
-            if (accuracy < 10) {
-                status = 'Excellent';
-                className = 'good';
-            } else if (accuracy < 30) {
-                status = 'Good';
-                className = 'good';
-            } else if (accuracy < 100) {
-                status = 'Fair';
-                className = 'medium';
-            } else {
-                status = 'Poor';
-                className = 'poor';
-            }
-
-            let altText = '';
-            if (altitude !== null && altitude !== undefined) {
-                altText = ` | Alt: ${Math.round(altitude)}m`;
-            }
-
-            elements.gpsAccuracy.textContent = `GPS: ${status} (±${Math.round(accuracy)}m)${altText}`;
-            elements.gpsAccuracy.className = `gps-accuracy ${className}`;
-            elements.statusDot.classList.add('active');
-            elements.statusText.textContent = state.isRecording ? 'Recording' : 'Ready';
+            let status, cls;
+            if (accuracy < 10) { status = 'Excellent'; cls = 'good'; }
+            else if (accuracy < 30) { status = 'Good'; cls = 'good'; }
+            else if (accuracy < 100) { status = 'Fair'; cls = 'medium'; }
+            else { status = 'Poor'; cls = 'poor'; }
+            const alt = (altitude != null) ? ` | ${Math.round(altitude)}m` : '';
+            el.gpsAccuracy.textContent = `GPS: ${status} (±${Math.round(accuracy)}m)${alt}`;
+            el.gpsAccuracy.className = `gps-accuracy ${cls}`;
+            el.statusDot.classList.add('active');
         }
 
         // ============================================
-        // Route Recording
+        // Recording
         // ============================================
-
         function startRecording() {
-            if (!state.currentPosition) {
-                showToast('Waiting for GPS signal...', 'error');
-                return;
-            }
-
+            if (!state.currentPosition) { showToast('Waiting for GPS...', 'error'); return; }
             state.isRecording = true;
             state.currentRoute = [];
             state.recordingStartTime = Date.now();
-
+            if (state.recordingMode === 'breadcrumb') state.breadcrumbReturn = [];
             addRoutePoint(state.currentPosition);
-
-            elements.recordBtn.classList.add('recording');
-            elements.recordBtnText.textContent = 'Stop';
-            elements.statusText.textContent = 'Recording';
-
-            // Haptic feedback if available
-            if (navigator.vibrate) {
-                navigator.vibrate(100);
-            }
-
-            // Start duration timer
-            updateRecordingStats();
+            el.recordBtn.classList.add('recording');
+            el.recordBtnText.textContent = 'Stop';
+            if (navigator.vibrate) navigator.vibrate(100);
             state.durationInterval = setInterval(updateRecordingStats, 1000);
         }
 
         function stopRecording() {
             state.isRecording = false;
             clearInterval(state.durationInterval);
-
-            elements.recordBtn.classList.remove('recording');
-            elements.recordBtnText.textContent = 'Start';
-            elements.statusText.textContent = 'Ready';
-
-            if (navigator.vibrate) {
-                navigator.vibrate([100, 50, 100]);
-            }
-
-            // Check if we have enough data
-            if (state.currentRoute.length < 5) {
-                showToast('Route too short to save', 'error');
+            el.recordBtn.classList.remove('recording');
+            el.recordBtnText.textContent = 'Start';
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            if (state.currentRoute.length < 3) { showToast('Route too short', 'error'); resetRecordingStats(); return; }
+            if (state.recordingMode === 'explore') {
+                autoMergeRoute(state.currentRoute);
+                showToast('Segments merged', 'success');
                 resetRecordingStats();
-                return;
+            } else if (state.recordingMode === 'breadcrumb') {
+                showToast('Breadcrumb cleared', 'success');
+                resetRecordingStats();
+            } else {
+                el.saveRouteModal.classList.add('active');
+                el.routeNameInput.value = '';
+                el.routeNameInput.focus();
+                state.routeTags = { avoidWet: false, avoidDark: false };
             }
-
-            // Show save modal
-            elements.saveRouteModal.classList.add('active');
-            elements.routeNameInput.value = '';
-            elements.routeNameInput.focus();
         }
 
-        function addRoutePoint(position) {
-            // Only add if moved enough (avoid clustering)
+        function addRoutePoint(pos) {
             if (state.currentRoute.length > 0) {
-                const lastPoint = state.currentRoute[state.currentRoute.length - 1];
-                const horizontalDist = calculateDistance(
-                    lastPoint.lat, lastPoint.lng,
-                    position.lat, position.lng
-                );
-                
-                // Calculate vertical movement (if altitude available)
-                let verticalDist = 0;
-                if (position.alt !== null && lastPoint.alt !== null) {
-                    verticalDist = Math.abs(position.alt - lastPoint.alt);
-                }
-                
-                // Only add if moved at least 5 meters horizontally OR 2 meters vertically
-                if (horizontalDist < 5 && verticalDist < 2) return;
+                const last = state.currentRoute[state.currentRoute.length - 1];
+                const hD = calculateDistance(last.lat, last.lng, pos.lat, pos.lng);
+                const vD = (pos.alt && last.alt) ? Math.abs(pos.alt - last.alt) : 0;
+                if (hD < 3 && vD < 1.5) return;
             }
-
-            state.currentRoute.push({
-                lat: position.lat,
-                lng: position.lng,
-                alt: position.alt,
-                accuracy: position.accuracy,
-                altAccuracy: position.altAccuracy,
-                timestamp: Date.now()
-            });
-
+            const point = { lat: pos.lat, lng: pos.lng, alt: pos.alt, accuracy: pos.accuracy, timestamp: Date.now() };
+            if (state.currentRoute.length > 0) {
+                const last = state.currentRoute[state.currentRoute.length - 1];
+                if (pos.alt && last.alt) {
+                    const altChange = Math.abs(pos.alt - last.alt);
+                    const timeDiff = (Date.now() - last.timestamp) / 1000;
+                    if (altChange > 2 && timeDiff < 30) point.isStairs = true;
+                }
+            }
+            state.currentRoute.push(point);
             updateRecordingStats();
         }
 
         function updateRecordingStats() {
-            // Distance
-            const distance = calculateRouteDistance(state.currentRoute);
-            elements.statDistance.textContent = (distance / 1000).toFixed(2);
-
-            // Duration
+            const dist = calculateRouteDistance(state.currentRoute);
+            el.statDistance.textContent = (dist / 1000).toFixed(2);
             if (state.recordingStartTime) {
-                const duration = Date.now() - state.recordingStartTime;
-                elements.statDuration.textContent = formatDuration(duration);
+                const dur = Date.now() - state.recordingStartTime;
+                el.statDuration.textContent = formatDuration(dur);
             }
-
-            // Points
-            elements.statPoints.textContent = state.currentRoute.length;
+            el.statPoints.textContent = state.currentRoute.length;
         }
 
         function resetRecordingStats() {
             state.currentRoute = [];
             state.recordingStartTime = null;
-            elements.statDistance.textContent = '0.0';
-            elements.statDuration.textContent = '0:00';
-            elements.statPoints.textContent = '0';
+            el.statDistance.textContent = '0.0';
+            el.statDuration.textContent = '0:00';
+            el.statPoints.textContent = '0';
         }
 
         async function saveRoute(name) {
             const route = {
-                name: name,
+                name,
                 points: state.currentRoute,
                 distance: calculateRouteDistance(state.currentRoute),
                 duration: Date.now() - state.recordingStartTime,
                 timestamp: Date.now(),
                 startPoint: state.currentRoute[0],
-                endPoint: state.currentRoute[state.currentRoute.length - 1]
+                endPoint: state.currentRoute[state.currentRoute.length - 1],
+                walkCount: 1,
+                avgTime: Date.now() - state.recordingStartTime,
+                hasStairs: state.currentRoute.some(p => p.isStairs),
+                tags: { ...state.routeTags },
+                confidence: 1
             };
-
+            const ts = document.getElementById('routeTimeStart').value;
+            const te = document.getElementById('routeTimeEnd').value;
+            if (ts) route.tags.timeStart = ts;
+            if (te) route.tags.timeEnd = te;
             try {
-                await dbAdd('routes', route);
+                const id = await dbAdd('routes', route);
+                route.id = id;
                 state.routes.push(route);
-                
-                // Update route mesh
+                await extractSegments(route);
                 await updateRouteMesh(route);
-                
                 showToast(`Route "${name}" saved!`, 'success');
                 renderRoutes();
                 updateDestinationDropdown();
                 updateDataStats();
-            } catch (e) {
-                showToast('Failed to save route', 'error');
-                console.error(e);
-            }
-
+            } catch (e) { showToast('Failed to save', 'error'); }
             resetRecordingStats();
-            elements.saveRouteModal.classList.remove('active');
+            el.saveRouteModal.classList.remove('active');
         }
 
         // ============================================
-        // Route Mesh Algorithm
+        // Segments & Mesh
         // ============================================
-
-        async function updateRouteMesh(newRoute) {
-            // Get existing mesh or create new
-            let mesh = state.routeMesh || { nodes: [], edges: [] };
-
-            // Add start and end as nodes if not already present
-            const startNode = findOrCreateNode(mesh, newRoute.startPoint);
-            const endNode = findOrCreateNode(mesh, newRoute.endPoint);
-
-            // Find intersections with existing routes
-            for (const route of state.routes) {
-                if (route === newRoute) continue;
-                
-                const intersections = findIntersections(newRoute.points, route.points);
-                for (const intersection of intersections) {
-                    findOrCreateNode(mesh, intersection);
+        async function extractSegments(route) {
+            const threshold = 30;
+            for (const existing of state.routes) {
+                if (existing.id === route.id) continue;
+                const ints = findAllIntersections(route.points, existing.points, threshold);
+                for (const int of ints) {
+                    const seg = { points: int.segmentPoints, fromRouteId: route.id, distance: calculateRouteDistance(int.segmentPoints), timestamp: Date.now() };
+                    await dbAdd('segments', seg);
+                    state.segments.push(seg);
                 }
             }
-
-            // Create edges between consecutive nodes along this route
-            const routeNodes = getNodesAlongRoute(mesh, newRoute);
-            for (let i = 0; i < routeNodes.length - 1; i++) {
-                const edge = {
-                    from: routeNodes[i].id,
-                    to: routeNodes[i + 1].id,
-                    distance: calculateDistance(
-                        routeNodes[i].lat, routeNodes[i].lng,
-                        routeNodes[i + 1].lat, routeNodes[i + 1].lng
-                    ),
-                    routeId: newRoute.id
-                };
-                
-                // Check if edge already exists
-                const existingEdge = mesh.edges.find(e => 
-                    (e.from === edge.from && e.to === edge.to) ||
-                    (e.from === edge.to && e.to === edge.from)
-                );
-                
-                if (!existingEdge) {
-                    mesh.edges.push(edge);
-                }
-            }
-
-            state.routeMesh = mesh;
-            await dbPut('mesh', { id: 'main', ...mesh });
         }
 
-        function findOrCreateNode(mesh, point, threshold = 30) {
-            // Find existing node within threshold distance
-            for (const node of mesh.nodes) {
-                const dist = calculateDistance(node.lat, node.lng, point.lat, point.lng);
-                if (dist < threshold) {
-                    return node;
-                }
-            }
-
-            // Create new node
-            const node = {
-                id: `node_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                lat: point.lat,
-                lng: point.lng
-            };
-            mesh.nodes.push(node);
-            return node;
-        }
-
-        function findIntersections(route1, route2, threshold = 20) {
-            const intersections = [];
-            
-            for (const p1 of route1) {
-                for (const p2 of route2) {
-                    const dist = calculateDistance(p1.lat, p1.lng, p2.lat, p2.lng);
+        function findAllIntersections(pts1, pts2, threshold) {
+            const ints = [];
+            for (let i = 0; i < pts1.length; i++) {
+                for (let j = 0; j < pts2.length; j++) {
+                    const dist = calculate3DDistance(pts1[i].lat, pts1[i].lng, pts1[i].alt, pts2[j].lat, pts2[j].lng, pts2[j].alt);
                     if (dist < threshold) {
-                        // Check if we already have a nearby intersection
-                        const nearby = intersections.some(i => 
-                            calculateDistance(i.lat, i.lng, p1.lat, p1.lng) < threshold
-                        );
-                        if (!nearby) {
-                            intersections.push({
-                                lat: (p1.lat + p2.lat) / 2,
-                                lng: (p1.lng + p2.lng) / 2
+                        const isNew = !ints.some(x => Math.abs(x.i1 - i) < 5 && Math.abs(x.i2 - j) < 5);
+                        if (isNew) {
+                            ints.push({
+                                i1: i, i2: j,
+                                point: { lat: (pts1[i].lat + pts2[j].lat) / 2, lng: (pts1[i].lng + pts2[j].lng) / 2, alt: (pts1[i].alt && pts2[j].alt) ? (pts1[i].alt + pts2[j].alt) / 2 : null },
+                                segmentPoints: pts1.slice(Math.max(0, i - 3), Math.min(pts1.length, i + 3))
                             });
                         }
                     }
                 }
             }
-            
-            return intersections;
+            return ints;
+        }
+
+        function autoMergeRoute(newPts) {
+            for (const route of state.routes) {
+                const ints = findAllIntersections(newPts, route.points, 25);
+                if (ints.length > 0) updateRouteMesh({ points: newPts, id: 'explore_' + Date.now() });
+            }
+        }
+
+        async function updateRouteMesh(route) {
+            let mesh = state.routeMesh || { nodes: [], edges: [] };
+            const start = findOrCreateNode(mesh, route.startPoint || route.points[0]);
+            const end = findOrCreateNode(mesh, route.endPoint || route.points[route.points.length - 1]);
+            for (const existing of state.routes) {
+                if (existing.id === route.id) continue;
+                const ints = findAllIntersections(route.points, existing.points, 25);
+                for (const int of ints) findOrCreateNode(mesh, int.point);
+            }
+            const nodes = getNodesAlongRoute(mesh, route);
+            for (let i = 0; i < nodes.length - 1; i++) {
+                const exists = mesh.edges.find(e => (e.from === nodes[i].id && e.to === nodes[i + 1].id) || (e.from === nodes[i + 1].id && e.to === nodes[i].id));
+                if (!exists) {
+                    mesh.edges.push({ from: nodes[i].id, to: nodes[i + 1].id, distance: calculateDistance(nodes[i].lat, nodes[i].lng, nodes[i + 1].lat, nodes[i + 1].lng), routeId: route.id, hasStairs: route.hasStairs });
+                }
+            }
+            state.routeMesh = mesh;
+            await dbPut('mesh', { id: 'main', ...mesh });
+        }
+
+        function findOrCreateNode(mesh, pt, threshold = 25) {
+            for (const n of mesh.nodes) {
+                if (calculateDistance(n.lat, n.lng, pt.lat, pt.lng) < threshold) return n;
+            }
+            const node = { id: `n_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`, lat: pt.lat, lng: pt.lng, alt: pt.alt };
+            mesh.nodes.push(node);
+            return node;
         }
 
         function getNodesAlongRoute(mesh, route) {
             const nodes = [];
-            const threshold = 30;
-
-            // Start node
-            const startNode = mesh.nodes.find(n => 
-                calculateDistance(n.lat, n.lng, route.startPoint.lat, route.startPoint.lng) < threshold
-            );
-            if (startNode) nodes.push(startNode);
-
-            // Find nodes along the route (in order)
-            for (const point of route.points) {
-                const nearNode = mesh.nodes.find(n => {
-                    if (nodes.includes(n)) return false;
-                    return calculateDistance(n.lat, n.lng, point.lat, point.lng) < threshold;
-                });
-                if (nearNode) nodes.push(nearNode);
+            const pts = route.points || [];
+            for (const pt of pts) {
+                const near = mesh.nodes.find(n => !nodes.includes(n) && calculateDistance(n.lat, n.lng, pt.lat, pt.lng) < 25);
+                if (near) nodes.push(near);
             }
-
             return nodes;
-        }
-
-        // Dijkstra's algorithm for finding optimal path
-        function findOptimalPath(mesh, startPlace, endPlace) {
-            if (!mesh || !mesh.nodes.length) return null;
-
-            // Find closest nodes to start and end places
-            const startNode = findClosestNode(mesh, startPlace);
-            const endNode = findClosestNode(mesh, endPlace);
-
-            if (!startNode || !endNode) return null;
-
-            // Dijkstra's algorithm
-            const distances = {};
-            const previous = {};
-            const unvisited = new Set();
-
-            for (const node of mesh.nodes) {
-                distances[node.id] = Infinity;
-                previous[node.id] = null;
-                unvisited.add(node.id);
-            }
-            distances[startNode.id] = 0;
-
-            while (unvisited.size > 0) {
-                // Find unvisited node with smallest distance
-                let current = null;
-                let minDist = Infinity;
-                for (const nodeId of unvisited) {
-                    if (distances[nodeId] < minDist) {
-                        minDist = distances[nodeId];
-                        current = nodeId;
-                    }
-                }
-
-                if (current === null || current === endNode.id) break;
-                unvisited.delete(current);
-
-                // Update distances to neighbors
-                const neighbors = mesh.edges.filter(e => e.from === current || e.to === current);
-                for (const edge of neighbors) {
-                    const neighborId = edge.from === current ? edge.to : edge.from;
-                    if (!unvisited.has(neighborId)) continue;
-
-                    const newDist = distances[current] + edge.distance;
-                    if (newDist < distances[neighborId]) {
-                        distances[neighborId] = newDist;
-                        previous[neighborId] = current;
-                    }
-                }
-            }
-
-            // Reconstruct path
-            const path = [];
-            let current = endNode.id;
-            while (current !== null) {
-                const node = mesh.nodes.find(n => n.id === current);
-                if (node) path.unshift(node);
-                current = previous[current];
-            }
-
-            return path.length > 1 ? path : null;
-        }
-
-        function findClosestNode(mesh, place) {
-            let closest = null;
-            let minDist = Infinity;
-
-            for (const node of mesh.nodes) {
-                const dist = calculateDistance(node.lat, node.lng, place.lat, place.lng);
-                if (dist < minDist) {
-                    minDist = dist;
-                    closest = node;
-                }
-            }
-
-            return minDist < 100 ? closest : null; // Only if within 100m
         }
 
         // ============================================
         // Navigation
         // ============================================
-
         function startNavigation(placeId) {
             const place = state.places.find(p => p.id === placeId);
             if (!place) return;
-
             state.selectedDestination = place;
             state.activeRoute = null;
             state.currentWaypointIndex = 0;
-
-            // Try to find a recorded route to this destination
-            const routeToUse = findBestRoute(state.currentPosition, place);
-            
-            if (routeToUse) {
-                state.activeRoute = routeToUse;
-                state.currentWaypointIndex = findNearestWaypointIndex(routeToUse.points, state.currentPosition);
-                showToast('Following recorded route', 'success');
-            }
-
-            elements.noDestination.classList.add('hidden');
-            elements.compass.classList.remove('hidden');
-            elements.navInfo.classList.remove('hidden');
-            elements.navDestination.textContent = `→ ${place.name}`;
-
-            // Show calibrate button if iOS needs permission
-            if (state.needsCompassPermission) {
-                elements.calibrateBtn.classList.remove('hidden');
+            state.isOffRoute = false;
+            const route = findBestRoute(state.currentPosition, place);
+            if (route) {
+                state.activeRoute = route;
+                state.currentWaypointIndex = findNearestWaypointIndex(route.points, state.currentPosition);
+                showToast('Following route', 'success');
             } else {
-                elements.calibrateBtn.classList.add('hidden');
+                showToast('No route - direct', 'warning');
             }
-
-            // Haptic feedback
-            if (navigator.vibrate) {
-                navigator.vibrate(50);
-            }
-
+            el.noDestination.classList.add('hidden');
+            el.compass.classList.remove('hidden');
+            el.navInfo.classList.remove('hidden');
+            el.offRouteBanner.classList.add('hidden');
+            el.navDestination.textContent = `→ ${place.name}`;
+            if (state.needsCompassPermission) el.calibrateBtn.classList.remove('hidden');
+            else el.calibrateBtn.classList.add('hidden');
+            if (navigator.vibrate) navigator.vibrate(50);
             updateNavigation();
+            learnPattern(placeId);
         }
 
         function stopNavigation() {
             state.selectedDestination = null;
             state.activeRoute = null;
             state.currentWaypointIndex = 0;
-            elements.destinationSelect.value = '';
-            elements.noDestination.classList.remove('hidden');
-            elements.compass.classList.add('hidden');
-            elements.navInfo.classList.add('hidden');
+            state.isOffRoute = false;
+            el.destinationSelect.value = '';
+            el.noDestination.classList.remove('hidden');
+            el.compass.classList.add('hidden');
+            el.navInfo.classList.add('hidden');
+            el.offRouteBanner.classList.add('hidden');
         }
 
-        // Find the best recorded route from current position to destination
-        function findBestRoute(currentPos, destination) {
+        function findBestRoute(currentPos, dest) {
             if (!currentPos || !state.routes.length) return null;
-
-            const POSITION_THRESHOLD = 50; // meters
-            const ALTITUDE_THRESHOLD = 10; // meters
-            
-            let bestRoute = null;
-            let bestScore = Infinity;
-
+            const threshold = 50;
+            const now = new Date();
+            const mins = now.getHours() * 60 + now.getMinutes();
+            let best = null, bestScore = Infinity;
             for (const route of state.routes) {
                 if (!route.points || route.points.length < 2) continue;
-
-                const startPoint = route.points[0];
-                const endPoint = route.points[route.points.length - 1];
-
-                // Check if route ends near destination
-                const endDist = calculateDistance(endPoint.lat, endPoint.lng, destination.lat, destination.lng);
-                const endAltDiff = (endPoint.alt && destination.alt) 
-                    ? Math.abs(endPoint.alt - destination.alt) 
-                    : 0;
-
-                if (endDist > POSITION_THRESHOLD || endAltDiff > ALTITUDE_THRESHOLD) {
-                    // Also check reverse (maybe they walked the route the other way)
-                    const startDist = calculateDistance(startPoint.lat, startPoint.lng, destination.lat, destination.lng);
-                    const startAltDiff = (startPoint.alt && destination.alt)
-                        ? Math.abs(startPoint.alt - destination.alt)
-                        : 0;
-                    
-                    if (startDist > POSITION_THRESHOLD || startAltDiff > ALTITUDE_THRESHOLD) {
-                        continue; // Neither end is near destination
-                    }
-                    
-                    // Reverse the route points
-                    route._reversed = true;
-                    route._points = [...route.points].reverse();
-                } else {
-                    route._reversed = false;
-                    route._points = route.points;
+                if (route.tags?.timeStart && route.tags?.timeEnd) {
+                    const [sh, sm] = route.tags.timeStart.split(':').map(Number);
+                    const [eh, em] = route.tags.timeEnd.split(':').map(Number);
+                    if (mins < sh * 60 + sm || mins > eh * 60 + em) continue;
                 }
-
-                // Check if any point on route is near current position
-                const nearestIdx = findNearestWaypointIndex(route._points, currentPos);
-                const nearestPoint = route._points[nearestIdx];
-                const nearestDist = calculate3DDistance(
-                    nearestPoint.lat, nearestPoint.lng, nearestPoint.alt,
-                    currentPos.lat, currentPos.lng, currentPos.alt
-                );
-
-                if (nearestDist < POSITION_THRESHOLD) {
-                    // Score based on how close we are to the start of remaining route
-                    const score = nearestDist + (nearestIdx * 2); // Prefer routes where we're near the start
-                    
-                    if (score < bestScore) {
-                        bestScore = score;
-                        bestRoute = {
-                            ...route,
-                            points: route._points
-                        };
-                    }
+                if (state.settings.avoidWet && route.tags?.avoidWet) continue;
+                if (state.settings.preferFlat && route.hasStairs) continue;
+                const start = route.points[0], end = route.points[route.points.length - 1];
+                let reversed = false;
+                let endDist = calculate3DDistance(end.lat, end.lng, end.alt, dest.lat, dest.lng, dest.alt);
+                if (endDist > threshold) {
+                    const startDist = calculate3DDistance(start.lat, start.lng, start.alt, dest.lat, dest.lng, dest.alt);
+                    if (startDist > threshold) continue;
+                    reversed = true;
+                }
+                const pts = reversed ? [...route.points].reverse() : route.points;
+                const nearIdx = findNearestWaypointIndex(pts, currentPos);
+                const nearPt = pts[nearIdx];
+                const nearDist = calculate3DDistance(nearPt.lat, nearPt.lng, nearPt.alt, currentPos.lat, currentPos.lng, currentPos.alt);
+                if (nearDist < threshold) {
+                    const score = nearDist + nearIdx * 2 - (route.confidence || 1) * 10 - (route.walkCount || 1) * 5;
+                    if (score < bestScore) { bestScore = score; best = { ...route, points: pts }; }
                 }
             }
-
-            return bestRoute;
+            if (!best && state.routeMesh) best = findMeshRoute(currentPos, dest);
+            return best;
         }
 
-        // Find which waypoint on a route we're closest to
-        function findNearestWaypointIndex(points, currentPos) {
-            let nearestIdx = 0;
-            let nearestDist = Infinity;
-
-            for (let i = 0; i < points.length; i++) {
-                const dist = calculate3DDistance(
-                    points[i].lat, points[i].lng, points[i].alt,
-                    currentPos.lat, currentPos.lng, currentPos.alt
-                );
-                if (dist < nearestDist) {
-                    nearestDist = dist;
-                    nearestIdx = i;
+        function findMeshRoute(currentPos, dest) {
+            if (!state.routeMesh?.nodes?.length) return null;
+            const startN = findClosestNode(state.routeMesh, currentPos);
+            const endN = findClosestNode(state.routeMesh, dest);
+            if (!startN || !endN) return null;
+            const dist = {}, prev = {}, unvisited = new Set();
+            for (const n of state.routeMesh.nodes) { dist[n.id] = Infinity; prev[n.id] = null; unvisited.add(n.id); }
+            dist[startN.id] = 0;
+            while (unvisited.size > 0) {
+                let cur = null, minD = Infinity;
+                for (const id of unvisited) if (dist[id] < minD) { minD = dist[id]; cur = id; }
+                if (cur === null || cur === endN.id) break;
+                unvisited.delete(cur);
+                const neighbors = state.routeMesh.edges.filter(e => e.from === cur || e.to === cur);
+                for (const edge of neighbors) {
+                    const nid = edge.from === cur ? edge.to : edge.from;
+                    if (!unvisited.has(nid)) continue;
+                    let cost = edge.distance;
+                    if (state.settings.preferFlat && edge.hasStairs) cost += 1000;
+                    const newD = dist[cur] + cost;
+                    if (newD < dist[nid]) { dist[nid] = newD; prev[nid] = cur; }
                 }
             }
-
-            return nearestIdx;
+            const path = [];
+            let c = endN.id;
+            while (c) { const n = state.routeMesh.nodes.find(x => x.id === c); if (n) path.unshift(n); c = prev[c]; }
+            return path.length > 1 ? { points: path, isMesh: true, name: 'Combined' } : null;
         }
 
-        // Calculate distance considering altitude
-        function calculate3DDistance(lat1, lng1, alt1, lat2, lng2, alt2) {
-            const horizontalDist = calculateDistance(lat1, lng1, lat2, lng2);
-            const verticalDist = (alt1 !== null && alt1 !== undefined && alt2 !== null && alt2 !== undefined)
-                ? Math.abs(alt1 - alt2)
-                : 0;
-            
-            // Pythagoras for 3D distance
-            return Math.sqrt(horizontalDist * horizontalDist + verticalDist * verticalDist);
+        function findClosestNode(mesh, pos) {
+            let closest = null, minD = Infinity;
+            for (const n of mesh.nodes) {
+                const d = calculateDistance(n.lat, n.lng, pos.lat, pos.lng);
+                if (d < minD) { minD = d; closest = n; }
+            }
+            return minD < 100 ? closest : null;
+        }
+
+        function findNearestWaypointIndex(pts, pos) {
+            let idx = 0, minD = Infinity;
+            for (let i = 0; i < pts.length; i++) {
+                const d = calculate3DDistance(pts[i].lat, pts[i].lng, pts[i].alt, pos.lat, pos.lng, pos.alt);
+                if (d < minD) { minD = d; idx = i; }
+            }
+            return idx;
         }
 
         function updateNavigation() {
             if (!state.selectedDestination || !state.currentPosition) return;
-
-            const current = state.currentPosition;
-            let target;
-            let isFinalDestination = false;
-
-            // If we have an active route, navigate to waypoints
-            if (state.activeRoute && state.activeRoute.points.length > 0) {
-                const points = state.activeRoute.points;
-                
-                // Check if we've reached current waypoint
-                const currentWaypoint = points[state.currentWaypointIndex];
-                const distToWaypoint = calculate3DDistance(
-                    current.lat, current.lng, current.alt,
-                    currentWaypoint.lat, currentWaypoint.lng, currentWaypoint.alt
-                );
-
-                // If close to waypoint, advance to next
-                if (distToWaypoint < 8) { // 8 meters threshold
-                    if (state.currentWaypointIndex < points.length - 1) {
-                        state.currentWaypointIndex++;
-                        // Small vibration to indicate waypoint reached
-                        if (navigator.vibrate) {
-                            navigator.vibrate(30);
-                        }
-                    }
-                }
-
-                // Target is current waypoint
-                target = points[state.currentWaypointIndex];
-                isFinalDestination = (state.currentWaypointIndex === points.length - 1);
-                
-                // Show progress
-                const progress = Math.round((state.currentWaypointIndex / (points.length - 1)) * 100);
-                elements.navDestination.textContent = `→ ${state.selectedDestination.name} (${progress}%)`;
+            const cur = state.currentPosition;
+            let target, isFinal = false;
+            if (state.activeRoute?.points?.length > 0) {
+                const pts = state.activeRoute.points;
+                const wp = pts[state.currentWaypointIndex];
+                const distWp = calculate3DDistance(cur.lat, cur.lng, cur.alt, wp.lat, wp.lng, wp.alt);
+                const off = distWp > 50;
+                if (off && !state.isOffRoute) { state.isOffRoute = true; el.offRouteBanner.classList.remove('hidden'); if (navigator.vibrate) navigator.vibrate([100, 100, 100]); }
+                else if (!off && state.isOffRoute) { state.isOffRoute = false; el.offRouteBanner.classList.add('hidden'); }
+                if (distWp < 8 && state.currentWaypointIndex < pts.length - 1) { state.currentWaypointIndex++; if (navigator.vibrate) navigator.vibrate(30); }
+                target = pts[state.currentWaypointIndex];
+                isFinal = state.currentWaypointIndex === pts.length - 1;
+                const prog = Math.round((state.currentWaypointIndex / (pts.length - 1)) * 100);
+                el.navDestination.textContent = `→ ${state.selectedDestination.name} (${prog}%)`;
             } else {
-                // No route, point directly to destination
                 target = state.selectedDestination;
-                isFinalDestination = true;
+                isFinal = true;
             }
-
-            // Calculate distance to current target
-            const distance = calculate3DDistance(
-                current.lat, current.lng, current.alt,
-                target.lat, target.lng, target.alt
-            );
-
-            // Update distance display
-            if (distance >= 1000) {
-                elements.navDistanceValue.textContent = (distance / 1000).toFixed(1);
-                elements.navDistanceUnit.textContent = 'km';
-            } else {
-                elements.navDistanceValue.textContent = Math.round(distance);
-                elements.navDistanceUnit.textContent = 'm';
-            }
-
-            // Calculate bearing to target
-            const bearing = calculateBearing(current.lat, current.lng, target.lat, target.lng);
-
-            // Update ETA based on total remaining distance
-            let totalRemaining = distance;
+            const dist = calculate3DDistance(cur.lat, cur.lng, cur.alt, target.lat, target.lng, target.alt);
+            if (dist >= 1000) { el.navDistanceValue.textContent = (dist / 1000).toFixed(1); el.navDistanceUnit.textContent = 'km'; }
+            else { el.navDistanceValue.textContent = Math.round(dist); el.navDistanceUnit.textContent = 'm'; }
+            const bearing = calculateBearing(cur.lat, cur.lng, target.lat, target.lng);
+            let total = dist;
             if (state.activeRoute && state.currentWaypointIndex < state.activeRoute.points.length - 1) {
-                // Add distance of remaining waypoints
                 for (let i = state.currentWaypointIndex; i < state.activeRoute.points.length - 1; i++) {
-                    const p1 = state.activeRoute.points[i];
-                    const p2 = state.activeRoute.points[i + 1];
-                    totalRemaining += calculateDistance(p1.lat, p1.lng, p2.lat, p2.lng);
+                    const p1 = state.activeRoute.points[i], p2 = state.activeRoute.points[i + 1];
+                    total += calculateDistance(p1.lat, p1.lng, p2.lat, p2.lng);
                 }
             }
-            
-            const walkingSpeed = 5; // km/h
-            const etaMinutes = (totalRemaining / 1000) / walkingSpeed * 60;
-            elements.navEta.textContent = `ETA: ${Math.round(etaMinutes)} min`;
-
-            // Store bearing for compass update
+            el.navEta.textContent = `ETA: ${Math.round((total / 1000) / 5 * 60)} min`;
             state.targetBearing = bearing;
             updateCompassArrow();
-
-            // Check if arrived at final destination
-            if (isFinalDestination && distance < 15) {
-                if (navigator.vibrate) {
-                    navigator.vibrate([200, 100, 200, 100, 200]);
-                }
-                showToast(`You've arrived at ${state.selectedDestination.name}!`, 'success');
-                stopNavigation();
+            if (isFinal && dist < 15) {
+                if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+                showToast(`Arrived at ${state.selectedDestination.name}!`, 'success');
+                if (state.multiStopTrip.length > 0 && state.currentTripIndex < state.multiStopTrip.length - 1) {
+                    state.currentTripIndex++;
+                    startNavigation(state.multiStopTrip[state.currentTripIndex]);
+                } else stopNavigation();
             }
         }
 
         function updateCompassArrow() {
             if (!state.targetBearing) return;
-
-            // Calculate how far off you are from facing the destination
-            let rotation = state.targetBearing;
-            
-            if (state.deviceHeading !== null) {
-                rotation = state.targetBearing - state.deviceHeading;
+            let rot = state.targetBearing;
+            if (state.deviceHeading !== null) rot = state.targetBearing - state.deviceHeading;
+            let norm = ((rot % 360) + 360) % 360;
+            if (norm > 180) norm -= 360;
+            const abs = Math.abs(norm);
+            if (el.navHint) {
+                if (abs < 15) { el.navHint.innerHTML = '<strong>✓ On track!</strong>'; el.navHint.style.borderColor = 'var(--accent)'; }
+                else if (abs < 45) { el.navHint.innerHTML = `<strong>Almost!</strong> Turn slightly ${norm > 0 ? 'right' : 'left'}`; el.navHint.style.borderColor = 'var(--warning)'; }
+                else if (abs < 135) { el.navHint.innerHTML = `<strong>Turn ${norm > 0 ? 'right' : 'left'}</strong>`; el.navHint.style.borderColor = ''; }
+                else { el.navHint.innerHTML = '<strong>Turn around</strong>'; el.navHint.style.borderColor = ''; }
             }
-
-            // Normalize to -180 to 180 for direction hints
-            let normalizedRotation = ((rotation % 360) + 360) % 360;
-            if (normalizedRotation > 180) normalizedRotation -= 360;
-
-            // Update hint based on where N is
-            if (elements.navHint) {
-                const absRotation = Math.abs(normalizedRotation);
-                if (absRotation < 15) {
-                    elements.navHint.innerHTML = '<strong>✓ N is up — you\'re on track!</strong><br>Keep walking forward';
-                    elements.navHint.style.borderColor = 'var(--accent)';
-                } else if (absRotation < 45) {
-                    const dir = normalizedRotation > 0 ? 'right' : 'left';
-                    elements.navHint.innerHTML = `<strong>Almost there!</strong><br>Turn slightly ${dir} until N is up`;
-                    elements.navHint.style.borderColor = 'var(--warning)';
-                } else if (absRotation < 90) {
-                    const dir = normalizedRotation > 0 ? 'right' : 'left';
-                    elements.navHint.innerHTML = `<strong>Turn ${dir}</strong><br>Until N reaches the top`;
-                    elements.navHint.style.borderColor = '';
-                } else if (absRotation < 135) {
-                    const dir = normalizedRotation > 0 ? 'right' : 'left';
-                    elements.navHint.innerHTML = `<strong>Turn ${dir}</strong><br>N is behind you`;
-                    elements.navHint.style.borderColor = '';
-                } else {
-                    elements.navHint.innerHTML = `<strong>Turn around</strong><br>N is behind you`;
-                    elements.navHint.style.borderColor = '';
-                }
-            }
-
-            // Rotate the compass ring (N, E, S, W) — NOT the arrow
-            // Arrow stays fixed pointing up
-            // Ring rotates so N shows direction to destination
-            const ringRotation = (((-rotation) % 360) + 360) % 360;
-            if (elements.compassDirections) {
-                elements.compassDirections.style.transform = `rotate(${ringRotation}deg)`;
-            }
+            const ringRot = (((-rot) % 360) + 360) % 360;
+            if (el.compassDirs) el.compassDirs.style.transform = `rotate(${ringRot}deg)`;
         }
 
         // ============================================
-        // Places Management
+        // Panic / Home / Nearest
         // ============================================
+        function panicGetHome() {
+            let home = state.places.find(p => p.type === 'home') || state.places.find(p => p.type === 'safe') || findNearestPlace();
+            if (home) {
+                showToast('Heading home...', 'success');
+                el.destinationSelect.value = home.id;
+                startNavigation(home.id);
+                document.querySelector('[data-view="navigate"]').click();
+            } else showToast('No home saved', 'error');
+        }
 
-        async function savePlace(name) {
-            if (!state.currentPosition) {
-                showToast('Waiting for GPS...', 'error');
-                return;
+        function findNearestPlace() {
+            if (!state.currentPosition || !state.places.length) return null;
+            let nearest = null, minD = Infinity;
+            for (const p of state.places) {
+                const d = calculateDistance(state.currentPosition.lat, state.currentPosition.lng, p.lat, p.lng);
+                if (d < minD) { minD = d; nearest = p; }
             }
+            return nearest;
+        }
 
+        function startBreadcrumbReturn() {
+            if (state.breadcrumbReturn.length < 2) { showToast('No breadcrumb', 'error'); return; }
+            const ret = [...state.breadcrumbReturn].reverse();
+            state.activeRoute = { points: ret, name: 'Return', isBreadcrumb: true };
+            state.currentWaypointIndex = 0;
+            state.selectedDestination = { name: 'Start', lat: ret[ret.length - 1].lat, lng: ret[ret.length - 1].lng, alt: ret[ret.length - 1].alt };
+            el.noDestination.classList.add('hidden');
+            el.compass.classList.remove('hidden');
+            el.navInfo.classList.remove('hidden');
+            el.navDestination.textContent = '→ Return';
+            showToast('Following breadcrumbs', 'success');
+            updateNavigation();
+        }
+
+        // ============================================
+        // Multi-Stop
+        // ============================================
+        function showMultiStopModal() {
+            const list = document.getElementById('multiStopList');
+            list.innerHTML = '';
+            for (const p of state.places) {
+                const item = document.createElement('div');
+                item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;cursor:pointer;';
+                item.innerHTML = `<input type="checkbox" data-place-id="${p.id}"><span style="font-size:0.85rem">${p.name}</span>`;
+                list.appendChild(item);
+            }
+            document.getElementById('multiStopModal').classList.add('active');
+        }
+
+        function startMultiStopTrip() {
+            const cbs = document.querySelectorAll('#multiStopList input:checked');
+            if (cbs.length < 2) { showToast('Select 2+ places', 'error'); return; }
+            state.multiStopTrip = Array.from(cbs).map(cb => parseInt(cb.dataset.placeId));
+            state.currentTripIndex = 0;
+            document.getElementById('multiStopModal').classList.remove('active');
+            state.multiStopTrip = optimizeTripOrder(state.multiStopTrip);
+            showToast(`Trip: ${state.multiStopTrip.length} stops`, 'success');
+            startNavigation(state.multiStopTrip[0]);
+        }
+
+        function optimizeTripOrder(ids) {
+            if (!state.currentPosition) return ids;
+            const result = [], remaining = [...ids];
+            let pos = state.currentPosition;
+            while (remaining.length > 0) {
+                let nearIdx = 0, minD = Infinity;
+                for (let i = 0; i < remaining.length; i++) {
+                    const place = state.places.find(p => p.id === remaining[i]);
+                    if (!place) continue;
+                    const d = calculateDistance(pos.lat, pos.lng, place.lat, place.lng);
+                    if (d < minD) { minD = d; nearIdx = i; }
+                }
+                const nextId = remaining.splice(nearIdx, 1)[0];
+                result.push(nextId);
+                const next = state.places.find(p => p.id === nextId);
+                if (next) pos = next;
+            }
+            return result;
+        }
+
+        // ============================================
+        // Patterns
+        // ============================================
+        function checkPatterns() {
+            const now = new Date();
+            const day = now.getDay(), hour = now.getHours();
+            for (const p of state.patterns) {
+                if (p.dayOfWeek === day && Math.abs(p.hour - hour) <= 1 && !p.suggested) {
+                    const place = state.places.find(x => x.id === p.placeId);
+                    if (place && p.count >= 3) {
+                        p.suggested = true;
+                        // Could show suggestion UI
+                    }
+                }
+            }
+        }
+
+        async function learnPattern(placeId) {
+            const now = new Date();
+            const pattern = { placeId, dayOfWeek: now.getDay(), hour: now.getHours(), count: 1, timestamp: Date.now() };
+            const existing = state.patterns.find(p => p.placeId === placeId && p.dayOfWeek === pattern.dayOfWeek && Math.abs(p.hour - pattern.hour) <= 1);
+            if (existing) { existing.count++; await dbPut('patterns', existing); }
+            else { const id = await dbAdd('patterns', pattern); pattern.id = id; state.patterns.push(pattern); }
+        }
+
+        // ============================================
+        // Places
+        // ============================================
+        async function savePlace(name) {
+            if (!state.currentPosition) { showToast('Waiting for GPS', 'error'); return; }
             const place = {
-                name: name,
+                name,
                 lat: state.currentPosition.lat,
                 lng: state.currentPosition.lng,
                 alt: state.currentPosition.alt,
+                type: document.getElementById('placeType').value,
+                note: document.getElementById('placeNote').value,
                 timestamp: Date.now()
             };
-
             try {
                 const id = await dbAdd('places', place);
                 place.id = id;
                 state.places.push(place);
-                
                 showToast(`Place "${name}" saved!`, 'success');
                 renderPlaces();
                 updateDestinationDropdown();
                 updateDataStats();
-            } catch (e) {
-                showToast('Failed to save place', 'error');
-                console.error(e);
-            }
-
-            elements.savePlaceModal.classList.remove('active');
+            } catch (e) { showToast('Failed', 'error'); }
+            el.savePlaceModal.classList.remove('active');
         }
 
         async function deletePlace(id) {
-            try {
-                await dbDelete('places', id);
-                state.places = state.places.filter(p => p.id !== id);
-                renderPlaces();
-                updateDestinationDropdown();
-                updateDataStats();
-                showToast('Place deleted', 'success');
-            } catch (e) {
-                showToast('Failed to delete place', 'error');
-            }
+            await dbDelete('places', id);
+            state.places = state.places.filter(p => p.id !== id);
+            renderPlaces();
+            updateDestinationDropdown();
+            updateDataStats();
+            showToast('Deleted', 'success');
         }
 
         async function deleteRoute(id) {
-            try {
-                await dbDelete('routes', id);
-                state.routes = state.routes.filter(r => r.id !== id);
-                renderRoutes();
-                updateDataStats();
-                showToast('Route deleted', 'success');
-            } catch (e) {
-                showToast('Failed to delete route', 'error');
-            }
+            await dbDelete('routes', id);
+            state.routes = state.routes.filter(r => r.id !== id);
+            renderRoutes();
+            updateDataStats();
+            showToast('Deleted', 'success');
         }
 
         // ============================================
-        // Utility Functions
+        // Map
         // ============================================
-
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371000; // Earth's radius in meters
-            const dLat = toRad(lat2 - lat1);
-            const dLon = toRad(lon2 - lon1);
-            const a = 
-                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c;
-        }
-
-        function calculateBearing(lat1, lon1, lat2, lon2) {
-            const dLon = toRad(lon2 - lon1);
-            const y = Math.sin(dLon) * Math.cos(toRad(lat2));
-            const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
-                      Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
-            let bearing = Math.atan2(y, x);
-            bearing = toDeg(bearing);
-            return (bearing + 360) % 360;
-        }
-
-        function toRad(deg) {
-            return deg * (Math.PI / 180);
-        }
-
-        function toDeg(rad) {
-            return rad * (180 / Math.PI);
-        }
-
-        function calculateRouteDistance(points) {
-            let total = 0;
-            for (let i = 1; i < points.length; i++) {
-                total += calculateDistance(
-                    points[i - 1].lat, points[i - 1].lng,
-                    points[i].lat, points[i].lng
-                );
+        function renderMap() {
+            const canvas = el.mapCanvas;
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            if (state.routes.length === 0 && state.places.length === 0) {
+                ctx.fillStyle = '#555';
+                ctx.font = '12px Outfit';
+                ctx.textAlign = 'center';
+                ctx.fillText('No data', canvas.width / 2, canvas.height / 2);
+                return;
             }
-            return total;
-        }
-
-        function formatDuration(ms) {
-            const seconds = Math.floor(ms / 1000);
-            const minutes = Math.floor(seconds / 60);
-            const hours = Math.floor(minutes / 60);
-            
-            if (hours > 0) {
-                return `${hours}:${String(minutes % 60).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+            let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
+            if (state.showRoutes) {
+                for (const r of state.routes) for (const p of r.points) { minLat = Math.min(minLat, p.lat); maxLat = Math.max(maxLat, p.lat); minLng = Math.min(minLng, p.lng); maxLng = Math.max(maxLng, p.lng); }
             }
-            return `${minutes}:${String(seconds % 60).padStart(2, '0')}`;
-        }
-
-        function formatDate(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleDateString('en-GB', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-            });
-        }
-
-        function showToast(message, type = 'success') {
-            elements.toast.textContent = message;
-            elements.toast.className = `toast ${type} show`;
-            
-            setTimeout(() => {
-                elements.toast.classList.remove('show');
-            }, 3000);
+            if (state.showPlaces) {
+                for (const p of state.places) { minLat = Math.min(minLat, p.lat); maxLat = Math.max(maxLat, p.lat); minLng = Math.min(minLng, p.lng); maxLng = Math.max(maxLng, p.lng); }
+            }
+            if (state.showLive && state.currentPosition) {
+                minLat = Math.min(minLat, state.currentPosition.lat); maxLat = Math.max(maxLat, state.currentPosition.lat);
+                minLng = Math.min(minLng, state.currentPosition.lng); maxLng = Math.max(maxLng, state.currentPosition.lng);
+            }
+            const pad = 25;
+            const latR = maxLat - minLat || 0.001, lngR = maxLng - minLng || 0.001;
+            const scale = Math.min((canvas.width - pad * 2) / lngR, (canvas.height - pad * 2) / latR);
+            const toX = lng => pad + (lng - minLng) * scale;
+            const toY = lat => canvas.height - pad - (lat - minLat) * scale;
+            if (state.showRoutes) {
+                for (const route of state.routes) {
+                    ctx.strokeStyle = route.hasStairs ? '#ef4444' : '#4ade80';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    for (let i = 0; i < route.points.length; i++) {
+                        const x = toX(route.points[i].lng), y = toY(route.points[i].lat);
+                        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                }
+            }
+            if (state.showPlaces) {
+                for (const p of state.places) {
+                    const x = toX(p.lng), y = toY(p.lat);
+                    ctx.fillStyle = p.type === 'home' ? '#4ade80' : p.type === 'work' ? '#3b82f6' : p.type === 'safe' ? '#f59e0b' : '#888';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '9px Outfit';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(p.name, x, y - 8);
+                }
+            }
+            if (state.showLive && state.currentPosition) {
+                const x = toX(state.currentPosition.lng), y = toY(state.currentPosition.lat);
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(x, y, 7, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
         }
 
         // ============================================
         // Data Export/Import
         // ============================================
-
-        async function exportWalkerData() {
-            try {
-                const routes = await dbGetAll('routes');
-                const places = await dbGetAll('places');
-                
-                const walkerData = {
-                    version: 1,
-                    exportedAt: new Date().toISOString(),
-                    app: 'NorthPath',
-                    routes: routes,
-                    places: places
-                };
-
-                const dataStr = JSON.stringify(walkerData, null, 2);
-                const blob = new Blob([dataStr], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                
-                const date = new Date().toISOString().split('T')[0];
-                const filename = `WalkerData_${date}.json`;
-                
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                showToast(`Downloaded ${filename}`, 'success');
-            } catch (e) {
-                console.error('Export failed:', e);
-                showToast('Export failed', 'error');
-            }
+        async function exportData() {
+            const data = { version: 2, exportedAt: new Date().toISOString(), app: 'NorthPath', routes: state.routes, places: state.places, segments: state.segments, patterns: state.patterns, settings: state.settings };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `WalkerData_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Downloaded', 'success');
         }
 
-        async function importWalkerData(file) {
+        async function importData(file) {
             try {
                 const text = await file.text();
-                const walkerData = JSON.parse(text);
-                
-                // Validate it's a WalkerData file
-                if (!walkerData.app || walkerData.app !== 'NorthPath') {
-                    // Also accept old PathMem files
-                    if (walkerData.app !== 'PathMem') {
-                        showToast('Invalid WalkerData file', 'error');
-                        return;
-                    }
-                }
-
-                let routesImported = 0;
-                let placesImported = 0;
-
-                // Import routes
-                if (walkerData.routes && Array.isArray(walkerData.routes)) {
-                    for (const route of walkerData.routes) {
-                        // Remove old ID so it gets a new one
-                        const { id, ...routeData } = route;
-                        await dbAdd('routes', routeData);
-                        routesImported++;
-                    }
-                }
-
-                // Import places
-                if (walkerData.places && Array.isArray(walkerData.places)) {
-                    for (const place of walkerData.places) {
-                        // Remove old ID so it gets a new one
-                        const { id, ...placeData } = place;
-                        await dbAdd('places', placeData);
-                        placesImported++;
-                    }
-                }
-
-                // Reload data
+                const data = JSON.parse(text);
+                if (!data.app || (data.app !== 'NorthPath' && data.app !== 'PathMem')) { showToast('Invalid file', 'error'); return; }
+                let r = 0, p = 0;
+                if (data.routes) for (const route of data.routes) { const { id, ...d } = route; await dbAdd('routes', d); r++; }
+                if (data.places) for (const place of data.places) { const { id, ...d } = place; await dbAdd('places', d); p++; }
+                if (data.settings) state.settings = { ...state.settings, ...data.settings };
                 state.routes = await dbGetAll('routes');
                 state.places = await dbGetAll('places');
-                
-                // Re-render UI
                 renderRoutes();
                 renderPlaces();
                 updateDestinationDropdown();
                 updateDataStats();
-
-                showToast(`Imported ${routesImported} routes, ${placesImported} places`, 'success');
-            } catch (e) {
-                console.error('Import failed:', e);
-                showToast('Import failed - invalid file', 'error');
-            }
+                showToast(`Imported ${r} routes, ${p} places`, 'success');
+            } catch (e) { showToast('Import failed', 'error'); }
         }
 
         function updateDataStats() {
-            const totalRoutes = state.routes.length;
-            const totalPlaces = state.places.length;
-            let totalPoints = 0;
-            
-            for (const route of state.routes) {
-                if (route.points) {
-                    totalPoints += route.points.length;
-                }
-            }
-
-            document.getElementById('totalRoutes').textContent = totalRoutes;
-            document.getElementById('totalPlaces').textContent = totalPlaces;
-            document.getElementById('totalPoints').textContent = totalPoints;
+            let pts = 0;
+            for (const r of state.routes) if (r.points) pts += r.points.length;
+            document.getElementById('totalRoutes').textContent = state.routes.length;
+            document.getElementById('totalPlaces').textContent = state.places.length;
+            document.getElementById('totalPoints').textContent = pts;
         }
 
         // ============================================
-        // UI Rendering
+        // Utility
         // ============================================
-
-        function renderRoutes() {
-            const list = elements.routeList;
-            
-            if (state.routes.length === 0) {
-                elements.routesEmpty.style.display = 'block';
-                elements.routesCount.textContent = '0 routes';
-                return;
-            }
-
-            elements.routesEmpty.style.display = 'none';
-            elements.routesCount.textContent = `${state.routes.length} route${state.routes.length !== 1 ? 's' : ''}`;
-
-            // Clear existing (except empty state)
-            const cards = list.querySelectorAll('.route-card');
-            cards.forEach(card => card.remove());
-
-            // Sort by date (newest first)
-            const sortedRoutes = [...state.routes].sort((a, b) => b.timestamp - a.timestamp);
-
-            for (const route of sortedRoutes) {
-                const card = document.createElement('div');
-                card.className = 'route-card';
-                card.innerHTML = `
-                    <div class="route-card-header">
-                        <span class="route-name">${escapeHtml(route.name)}</span>
-                        <span class="route-date">${formatDate(route.timestamp)}</span>
-                    </div>
-                    <div class="route-meta">
-                        <span>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 2L12 22M2 12L22 12"/>
-                            </svg>
-                            ${(route.distance / 1000).toFixed(2)} km
-                        </span>
-                        <span>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"/>
-                                <path d="M12 6L12 12L16 14"/>
-                            </svg>
-                            ${formatDuration(route.duration)}
-                        </span>
-                        <span>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="3"/>
-                            </svg>
-                            ${route.points.length} pts
-                        </span>
-                    </div>
-                `;
-                
-                card.addEventListener('click', () => {
-                    if (confirm(`Delete route "${route.name}"?`)) {
-                        deleteRoute(route.id);
-                    }
-                });
-                
-                list.appendChild(card);
-            }
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371000;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         }
 
-        function renderPlaces() {
-            const list = elements.placeList;
-            
-            if (state.places.length === 0) {
-                elements.placesEmpty.style.display = 'block';
-                return;
-            }
-
-            elements.placesEmpty.style.display = 'none';
-
-            // Clear existing (except empty state)
-            const cards = list.querySelectorAll('.place-card');
-            cards.forEach(card => card.remove());
-
-            for (const place of state.places) {
-                // Count routes that pass through this place
-                const routeCount = countRoutesForPlace(place);
-                
-                // Format altitude info
-                const altInfo = place.alt !== null && place.alt !== undefined 
-                    ? ` | ${Math.round(place.alt)}m alt` 
-                    : '';
-
-                const card = document.createElement('div');
-                card.className = 'place-card';
-                card.innerHTML = `
-                    <div class="place-info">
-                        <div class="place-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                                <circle cx="12" cy="10" r="3"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="place-name">${escapeHtml(place.name)}</div>
-                            <div class="place-routes">${routeCount} route${routeCount !== 1 ? 's' : ''} nearby${altInfo}</div>
-                        </div>
-                    </div>
-                    <div class="place-actions">
-                        <button class="place-action-btn nav-btn" title="Navigate">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polygon points="3 11 22 2 13 21 11 13 3 11"/>
-                            </svg>
-                        </button>
-                        <button class="place-action-btn danger delete-btn" title="Delete">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-                            </svg>
-                        </button>
-                    </div>
-                `;
-
-                card.querySelector('.nav-btn').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    document.querySelector('[data-view="navigate"]').click();
-                    elements.destinationSelect.value = place.id;
-                    startNavigation(place.id);
-                });
-
-                card.querySelector('.delete-btn').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (confirm(`Delete place "${place.name}"?`)) {
-                        deletePlace(place.id);
-                    }
-                });
-
-                list.appendChild(card);
-            }
+        function calculate3DDistance(lat1, lng1, alt1, lat2, lng2, alt2) {
+            const h = calculateDistance(lat1, lng1, lat2, lng2);
+            const v = (alt1 != null && alt2 != null) ? Math.abs(alt1 - alt2) : 0;
+            return Math.sqrt(h * h + v * v);
         }
 
-        function countRoutesForPlace(place) {
-            let count = 0;
-            const threshold = 50; // meters
-
-            for (const route of state.routes) {
-                // Check if any point in the route is near this place
-                const isNear = route.points.some(point => 
-                    calculateDistance(point.lat, point.lng, place.lat, place.lng) < threshold
-                );
-                if (isNear) count++;
-            }
-
-            return count;
+        function calculateBearing(lat1, lng1, lat2, lng2) {
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const y = Math.sin(dLng) * Math.cos(lat2 * Math.PI / 180);
+            const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) - Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLng);
+            return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
         }
 
-        function updateDestinationDropdown() {
-            const select = elements.destinationSelect;
-            
-            // Clear existing options (except first)
-            while (select.options.length > 1) {
-                select.remove(1);
-            }
+        function calculateRouteDistance(pts) {
+            let total = 0;
+            for (let i = 1; i < pts.length; i++) total += calculateDistance(pts[i - 1].lat, pts[i - 1].lng, pts[i].lat, pts[i].lng);
+            return total;
+        }
 
-            // Add places
-            for (const place of state.places) {
-                const option = document.createElement('option');
-                option.value = place.id;
-                option.textContent = place.name;
-                select.appendChild(option);
-            }
+        function formatDuration(ms) {
+            const s = Math.floor(ms / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60);
+            if (h > 0) return `${h}:${String(m % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+            return `${m}:${String(s % 60).padStart(2, '0')}`;
+        }
+
+        function formatDate(ts) {
+            return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function showToast(msg, type = 'success') {
+            el.toast.textContent = msg;
+            el.toast.className = `toast ${type} show`;
+            setTimeout(() => el.toast.classList.remove('show'), 3000);
         }
 
         function escapeHtml(text) {
@@ -2523,180 +1277,145 @@
         }
 
         // ============================================
-        // Event Listeners
+        // Rendering
         // ============================================
+        function renderRoutes() {
+            const list = el.routeList;
+            if (state.routes.length === 0) { el.routesEmpty.style.display = 'block'; el.routesCount.textContent = '0 routes'; return; }
+            el.routesEmpty.style.display = 'none';
+            el.routesCount.textContent = `${state.routes.length} routes`;
+            list.querySelectorAll('.route-card').forEach(c => c.remove());
+            const sorted = [...state.routes].sort((a, b) => b.timestamp - a.timestamp);
+            for (const route of sorted) {
+                const conf = route.confidence || 1;
+                const dots = Array(5).fill(0).map((_, i) => `<div class="conf-dot ${i < conf ? 'filled' : ''}"></div>`).join('');
+                let tags = '';
+                if (route.tags?.avoidWet) tags += '<span class="route-tag wet">Wet</span>';
+                if (route.tags?.avoidDark) tags += '<span class="route-tag">Dark</span>';
+                if (route.tags?.timeStart) tags += `<span class="route-tag time">${route.tags.timeStart}-${route.tags.timeEnd}</span>`;
+                if (route.hasStairs) tags += '<span class="route-tag stairs">Stairs</span>';
+                const card = document.createElement('div');
+                card.className = 'route-card';
+                card.innerHTML = `<div class="route-card-header"><span class="route-name">${escapeHtml(route.name)}</span><span class="route-date">${formatDate(route.timestamp)}</span></div><div class="route-meta"><span>${(route.distance / 1000).toFixed(2)}km</span><span>${formatDuration(route.duration || 0)}</span><span>${route.walkCount || 1}x</span><div class="confidence">${dots}</div></div>${tags ? `<div class="route-tags">${tags}</div>` : ''}`;
+                card.addEventListener('click', () => showRouteDetail(route));
+                list.appendChild(card);
+            }
+        }
 
-        function setupEventListeners() {
-            // Permission grant
-            elements.grantPermission.addEventListener('click', requestLocation);
+        function showRouteDetail(route) {
+            document.getElementById('routeDetailName').textContent = route.name;
+            document.getElementById('routeDetailContent').innerHTML = `<p style="font-size:0.8rem;color:var(--text-secondary)">Distance: ${(route.distance / 1000).toFixed(2)}km<br>Duration: ${formatDuration(route.duration || 0)}<br>Walked: ${route.walkCount || 1}x<br>Points: ${route.points?.length || 0}${route.hasStairs ? '<br>Has stairs' : ''}</p>`;
+            document.getElementById('deleteDetail').onclick = () => { if (confirm('Delete?')) { deleteRoute(route.id); document.getElementById('routeDetailModal').classList.remove('active'); } };
+            document.getElementById('routeDetailModal').classList.add('active');
+        }
 
-            // Tab navigation
+        function renderPlaces() {
+            const list = el.placeList;
+            if (state.places.length === 0) { el.placesEmpty.style.display = 'block'; return; }
+            el.placesEmpty.style.display = 'none';
+            list.querySelectorAll('.place-card').forEach(c => c.remove());
+            for (const place of state.places) {
+                const routeCount = state.routes.filter(r => r.points?.some(p => calculateDistance(p.lat, p.lng, place.lat, place.lng) < 50)).length;
+                const alt = place.alt != null ? ` | ${Math.round(place.alt)}m` : '';
+                const iconCls = place.type || 'default';
+                const card = document.createElement('div');
+                card.className = 'place-card';
+                card.innerHTML = `<div class="place-info"><div class="place-icon ${iconCls}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="place-name">${escapeHtml(place.name)}</div><div class="place-meta">${routeCount} routes${alt}</div></div></div><div class="place-actions"><button class="place-action-btn nav-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></button><button class="place-action-btn danger del-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div>`;
+                card.querySelector('.nav-btn').addEventListener('click', (e) => { e.stopPropagation(); document.querySelector('[data-view="navigate"]').click(); el.destinationSelect.value = place.id; startNavigation(place.id); });
+                card.querySelector('.del-btn').addEventListener('click', (e) => { e.stopPropagation(); if (confirm(`Delete "${place.name}"?`)) deletePlace(place.id); });
+                list.appendChild(card);
+            }
+        }
+
+        function updateDestinationDropdown() {
+            const sel = el.destinationSelect;
+            while (sel.options.length > 1) sel.remove(1);
+            for (const p of state.places) {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.name;
+                sel.appendChild(opt);
+            }
+        }
+
+        // ============================================
+        // Events
+        // ============================================
+        function setupEvents() {
+            el.grantPermission.addEventListener('click', requestLocation);
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.addEventListener('click', () => {
                     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
                     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-                    
                     tab.classList.add('active');
                     document.getElementById(`${tab.dataset.view}View`).classList.add('active');
+                    if (tab.dataset.view === 'map') renderMap();
                 });
             });
-
-            // Record button
-            elements.recordBtn.addEventListener('click', () => {
-                if (state.isRecording) {
-                    stopRecording();
-                } else {
-                    startRecording();
-                }
-            });
-
-            // Save route modal
-            document.getElementById('cancelSaveRoute').addEventListener('click', () => {
-                elements.saveRouteModal.classList.remove('active');
-                resetRecordingStats();
-            });
-
-            document.getElementById('confirmSaveRoute').addEventListener('click', () => {
-                const name = elements.routeNameInput.value.trim();
-                if (name) {
-                    saveRoute(name);
-                } else {
-                    showToast('Please enter a route name', 'error');
-                }
-            });
-
-            // Add place button
-            elements.addPlaceBtn.addEventListener('click', () => {
-                if (!state.currentPosition) {
-                    showToast('Waiting for GPS...', 'error');
-                    return;
-                }
-                elements.savePlaceModal.classList.add('active');
-                elements.placeNameInput.value = '';
-                elements.placeNameInput.focus();
-            });
-
-            // Save place modal
-            document.getElementById('cancelSavePlace').addEventListener('click', () => {
-                elements.savePlaceModal.classList.remove('active');
-            });
-
-            document.getElementById('confirmSavePlace').addEventListener('click', () => {
-                const name = elements.placeNameInput.value.trim();
-                if (name) {
-                    savePlace(name);
-                } else {
-                    showToast('Please enter a place name', 'error');
-                }
-            });
-
-            // Destination select
-            elements.destinationSelect.addEventListener('change', (e) => {
-                const placeId = parseInt(e.target.value);
-                if (placeId) {
-                    startNavigation(placeId);
-                } else {
-                    stopNavigation();
-                }
-            });
-
-            // Calibrate compass button (iOS)
-            elements.calibrateBtn.addEventListener('click', requestCompassPermission);
-
-            // Close modals on overlay click
-            document.querySelectorAll('.modal-overlay').forEach(overlay => {
-                overlay.addEventListener('click', (e) => {
-                    if (e.target === overlay) {
-                        overlay.classList.remove('active');
-                    }
+            el.recordBtn.addEventListener('click', () => state.isRecording ? stopRecording() : startRecording());
+            document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.mode-btn[data-mode]').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.recordingMode = btn.dataset.mode;
                 });
             });
-
-            // Enter key on inputs
-            elements.routeNameInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    document.getElementById('confirmSaveRoute').click();
-                }
-            });
-
-            elements.placeNameInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    document.getElementById('confirmSavePlace').click();
-                }
-            });
-
-            // Data export/import
-            document.getElementById('exportDataBtn').addEventListener('click', exportWalkerData);
-            
-            document.getElementById('importDataBtn').addEventListener('click', () => {
-                document.getElementById('importFileInput').click();
-            });
-
-            document.getElementById('importFileInput').addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    importWalkerData(file);
-                    e.target.value = ''; // Reset so same file can be selected again
-                }
-            });
+            document.getElementById('cancelRoute').addEventListener('click', () => { el.saveRouteModal.classList.remove('active'); resetRecordingStats(); });
+            document.getElementById('saveRoute').addEventListener('click', () => { const n = el.routeNameInput.value.trim(); if (n) saveRoute(n); else showToast('Enter name', 'error'); });
+            document.getElementById('tagWet').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.routeTags.avoidWet = e.target.classList.contains('active'); });
+            document.getElementById('tagDark').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.routeTags.avoidDark = e.target.classList.contains('active'); });
+            el.addPlaceBtn.addEventListener('click', () => { if (!state.currentPosition) { showToast('Waiting for GPS', 'error'); return; } el.savePlaceModal.classList.add('active'); el.placeNameInput.value = ''; el.placeNameInput.focus(); });
+            document.getElementById('cancelPlace').addEventListener('click', () => el.savePlaceModal.classList.remove('active'));
+            document.getElementById('savePlace').addEventListener('click', () => { const n = el.placeNameInput.value.trim(); if (n) savePlace(n); else showToast('Enter name', 'error'); });
+            el.destinationSelect.addEventListener('change', (e) => { const id = parseInt(e.target.value); id ? startNavigation(id) : stopNavigation(); });
+            el.calibrateBtn.addEventListener('click', requestCompassPermission);
+            document.getElementById('tripNearest').addEventListener('click', () => { const n = findNearestPlace(); if (n) { el.destinationSelect.value = n.id; startNavigation(n.id); } else showToast('No places', 'error'); });
+            document.getElementById('tripMulti').addEventListener('click', showMultiStopModal);
+            document.getElementById('tripFlat').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.settings.preferFlat = e.target.classList.contains('active'); showToast(state.settings.preferFlat ? 'Avoiding stairs' : 'Stairs OK', 'success'); });
+            document.getElementById('cancelMulti').addEventListener('click', () => document.getElementById('multiStopModal').classList.remove('active'));
+            document.getElementById('startMulti').addEventListener('click', startMultiStopTrip);
+            document.getElementById('closeDetail').addEventListener('click', () => document.getElementById('routeDetailModal').classList.remove('active'));
+            document.getElementById('offRouteRecord').addEventListener('click', () => { state.recordingMode = 'explore'; startRecording(); el.offRouteBanner.classList.add('hidden'); });
+            document.getElementById('offRouteRejoin').addEventListener('click', () => { if (state.activeRoute) { state.currentWaypointIndex = findNearestWaypointIndex(state.activeRoute.points, state.currentPosition); state.isOffRoute = false; el.offRouteBanner.classList.add('hidden'); showToast('Recalculating', 'success'); } });
+            el.panicBtn.addEventListener('click', panicGetHome);
+            document.getElementById('exportBtn').addEventListener('click', exportData);
+            document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+            document.getElementById('importFile').addEventListener('change', (e) => { if (e.target.files[0]) { importData(e.target.files[0]); e.target.value = ''; } });
+            document.getElementById('toggleWet').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.settings.avoidWet = e.target.classList.contains('active'); });
+            document.getElementById('toggleFlat').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.settings.preferFlat = e.target.classList.contains('active'); });
+            document.getElementById('togglePatterns').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.settings.learnPatterns = e.target.classList.contains('active'); });
+            document.getElementById('mapRoutes').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showRoutes = e.target.classList.contains('active'); renderMap(); });
+            document.getElementById('mapPlaces').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showPlaces = e.target.classList.contains('active'); renderMap(); });
+            document.getElementById('mapLive').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showLive = e.target.classList.contains('active'); renderMap(); });
+            document.getElementById('mapFit').addEventListener('click', renderMap);
+            document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', (e) => { if (e.target === ov) ov.classList.remove('active'); }));
+            el.routeNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('saveRoute').click(); });
+            el.placeNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('savePlace').click(); });
         }
 
         // ============================================
-        // Initialization
+        // Init
         // ============================================
-
         async function init() {
             try {
-                // Initialize database
+                initElements();
                 await initDB();
-
-                // Load saved data
                 state.routes = await dbGetAll('routes');
                 state.places = await dbGetAll('places');
-                
-                // Try to load mesh
-                try {
-                    const meshData = await new Promise((resolve, reject) => {
-                        const transaction = db.transaction('mesh', 'readonly');
-                        const store = transaction.objectStore('mesh');
-                        const request = store.get('main');
-                        request.onsuccess = () => resolve(request.result);
-                        request.onerror = () => reject(request.error);
-                    });
-                    if (meshData) {
-                        state.routeMesh = meshData;
-                    }
-                } catch (e) {
-                    console.log('No existing mesh');
-                }
-
-                // Render UI
+                state.segments = await dbGetAll('segments');
+                state.patterns = await dbGetAll('patterns');
+                try { const m = await dbGet('mesh', 'main'); if (m) state.routeMesh = m; } catch (e) {}
                 renderRoutes();
                 renderPlaces();
                 updateDestinationDropdown();
                 updateDataStats();
-
-                // Setup event listeners
-                setupEventListeners();
-
-                // Check permissions
+                setupEvents();
                 await checkPermissions();
-
-                console.log('NorthPath initialized');
-            } catch (e) {
-                console.error('Init failed:', e);
-                showToast('Failed to initialize app', 'error');
-            }
+                console.log('NorthPath v2 ready');
+            } catch (e) { console.error('Init failed:', e); showToast('Init failed', 'error'); }
         }
 
-        // Register service worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(() => console.log('Service Worker registered'))
-                .catch(err => console.error('SW registration failed:', err));
-        }
-
-        // Start app
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.error);
         init();
     </script>
 </body>
