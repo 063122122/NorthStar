@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
     <style>
         :root {
             --bg-primary: #0d0d0d;
@@ -138,8 +139,8 @@
         .place-action-btn:hover { border-color: var(--accent); color: var(--accent); }
         .place-action-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
         .map-view { height: 100%; display: flex; flex-direction: column; }
-        .map-container { flex: 1; background: var(--bg-secondary); border-radius: 10px; border: 1px solid var(--border); position: relative; overflow: hidden; min-height: 250px; }
-        .map-canvas { width: 100%; height: 100%; }
+        .map-container { flex: 1; background: var(--bg-secondary); border-radius: 10px; border: 1px solid var(--border); position: relative; overflow: hidden; min-height: 300px; z-index: 1; }
+        .map-container .leaflet-container { background: var(--bg-secondary); }
         .map-controls { display: flex; gap: 6px; margin-top: 10px; }
         .map-ctrl-btn { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-secondary); font-size: 0.7rem; cursor: pointer; }
         .map-ctrl-btn.active { border-color: var(--accent); color: var(--accent); }
@@ -290,8 +291,8 @@
             </div>
             <div class="view" id="mapView">
                 <div class="map-view">
-                    <div class="map-container"><canvas class="map-canvas" id="mapCanvas"></canvas></div>
-                    <div class="map-controls"><button class="map-ctrl-btn active" id="mapRoutes">Routes</button><button class="map-ctrl-btn" id="mapPlaces">Places</button><button class="map-ctrl-btn" id="mapLive">Live</button><button class="map-ctrl-btn" id="mapFit">Fit</button></div>
+                    <div class="map-container" id="mapContainer"></div>
+                    <div class="map-controls"><button class="map-ctrl-btn active" id="mapRoutes">Routes</button><button class="map-ctrl-btn active" id="mapPlaces">Places</button><button class="map-ctrl-btn active" id="mapLive">Live</button><button class="map-ctrl-btn" id="mapFit">Fit All</button></div>
                 </div>
             </div>
             <div class="view" id="dataView">
@@ -376,6 +377,7 @@
     <div class="loading-text">Rebuilding Intelligence...</div>
     <div class="loading-progress" id="loadingProgress">0%</div>
 </div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
     // ============================================
     // NorthPath v2 - Complete Navigation System
@@ -451,7 +453,6 @@
         el.toast = document.getElementById('toast');
         el.calibrateBtn = document.getElementById('calibrateBtn');
         el.offRouteBanner = document.getElementById('offRouteBanner');
-        el.mapCanvas = document.getElementById('mapCanvas');
         el.panicBtn = document.getElementById('panicBtn');
     }
 
@@ -585,6 +586,10 @@
         }
         if (state.selectedDestination) updateNavigation();
         if (state.settings.learnPatterns) checkPatterns();
+        // Update live marker on map
+        if (map && liveMarker && state.showLive) {
+            liveMarker.setLatLng([state.currentPosition.lat, state.currentPosition.lng]);
+        }
     }
 
     function handleOrientation(event) {
@@ -1258,72 +1263,146 @@
     // ============================================
     // Map
     // ============================================
+    // ============================================
+    // Leaflet Map
+    // ============================================
+    let map = null;
+    let routeLayers = [];
+    let placeMarkers = [];
+    let liveMarker = null;
+
+    function initMap() {
+        if (map) return;
+        
+        const container = document.getElementById('mapContainer');
+        if (!container) return;
+        
+        // Default to UK if no position
+        const defaultLat = state.currentPosition?.lat || 55.9;
+        const defaultLng = state.currentPosition?.lng || -3.2;
+        
+        map = L.map(container, {
+            zoomControl: true,
+            attributionControl: false
+        }).setView([defaultLat, defaultLng], 15);
+        
+        // Dark tiles that match our theme
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Add small attribution
+        L.control.attribution({
+            position: 'bottomright',
+            prefix: ''
+        }).addTo(map).addAttribution('© <a href="https://www.openstreetmap.org/">OSM</a>');
+        
+        renderMapLayers();
+    }
+
     function renderMap() {
-        const canvas = el.mapCanvas;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        const rect = canvas.parentElement.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-        ctx.fillStyle = '#1a1a1a';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        if (state.routes.length === 0 && state.places.length === 0) {
-            ctx.fillStyle = '#555';
-            ctx.font = '12px Outfit';
-            ctx.textAlign = 'center';
-            ctx.fillText('No data', canvas.width / 2, canvas.height / 2);
+        if (!map) {
+            initMap();
             return;
         }
-        let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
-        if (state.showRoutes) {
-            for (const r of state.routes) for (const p of r.points) { minLat = Math.min(minLat, p.lat); maxLat = Math.max(maxLat, p.lat); minLng = Math.min(minLng, p.lng); maxLng = Math.max(maxLng, p.lng); }
+        renderMapLayers();
+    }
+
+    function renderMapLayers() {
+        if (!map) return;
+        
+        // Clear existing layers
+        routeLayers.forEach(layer => map.removeLayer(layer));
+        placeMarkers.forEach(marker => map.removeLayer(marker));
+        if (liveMarker) map.removeLayer(liveMarker);
+        routeLayers = [];
+        placeMarkers = [];
+        liveMarker = null;
+        
+        const bounds = [];
+        
+        // Draw routes
+        if (state.showRoutes && state.routes.length > 0) {
+            for (const route of state.routes) {
+                if (!route.points || route.points.length < 2) continue;
+                
+                const latlngs = route.points.map(p => [p.lat, p.lng]);
+                const color = route.hasStairs ? '#ef4444' : '#4ade80';
+                
+                const polyline = L.polyline(latlngs, {
+                    color: color,
+                    weight: 4,
+                    opacity: 0.8
+                }).addTo(map);
+                
+                polyline.bindPopup(`<strong>${route.name}</strong><br>${(route.distance/1000).toFixed(2)}km`);
+                routeLayers.push(polyline);
+                
+                latlngs.forEach(ll => bounds.push(ll));
+            }
         }
-        if (state.showPlaces) {
-            for (const p of state.places) { minLat = Math.min(minLat, p.lat); maxLat = Math.max(maxLat, p.lat); minLng = Math.min(minLng, p.lng); maxLng = Math.max(maxLng, p.lng); }
+        
+        // Draw places
+        if (state.showPlaces && state.places.length > 0) {
+            for (const place of state.places) {
+                const color = place.type === 'home' ? '#4ade80' : 
+                              place.type === 'work' ? '#3b82f6' : 
+                              place.type === 'safe' ? '#f59e0b' : '#888';
+                
+                const icon = L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7]
+                });
+                
+                const marker = L.marker([place.lat, place.lng], { icon: icon }).addTo(map);
+                marker.bindPopup(`<strong>${place.name}</strong>${place.note ? '<br>' + place.note : ''}`);
+                placeMarkers.push(marker);
+                
+                bounds.push([place.lat, place.lng]);
+            }
         }
+        
+        // Draw current position
         if (state.showLive && state.currentPosition) {
-            minLat = Math.min(minLat, state.currentPosition.lat); maxLat = Math.max(maxLat, state.currentPosition.lat);
-            minLng = Math.min(minLng, state.currentPosition.lng); maxLng = Math.max(maxLng, state.currentPosition.lng);
+            const liveIcon = L.divIcon({
+                className: 'live-marker',
+                html: `<div style="background:#ef4444;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(239,68,68,0.5);"></div>`,
+                iconSize: [16, 16],
+                iconAnchor: [8, 8]
+            });
+            
+            liveMarker = L.marker([state.currentPosition.lat, state.currentPosition.lng], { icon: liveIcon }).addTo(map);
+            liveMarker.bindPopup('You are here');
+            
+            bounds.push([state.currentPosition.lat, state.currentPosition.lng]);
         }
-        const pad = 25;
-        const latR = maxLat - minLat || 0.001, lngR = maxLng - minLng || 0.001;
-        const scale = Math.min((canvas.width - pad * 2) / lngR, (canvas.height - pad * 2) / latR);
-        const toX = lng => pad + (lng - minLng) * scale;
-        const toY = lat => canvas.height - pad - (lat - minLat) * scale;
+        
+        // Fit bounds if we have data
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [30, 30], maxZoom: 17 });
+        }
+    }
+
+    function fitMapBounds() {
+        if (!map) return;
+        const bounds = [];
+        
         if (state.showRoutes) {
             for (const route of state.routes) {
-                ctx.strokeStyle = route.hasStairs ? '#ef4444' : '#4ade80';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                for (let i = 0; i < route.points.length; i++) {
-                    const x = toX(route.points[i].lng), y = toY(route.points[i].lat);
-                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                }
-                ctx.stroke();
+                if (route.points) route.points.forEach(p => bounds.push([p.lat, p.lng]));
             }
         }
         if (state.showPlaces) {
-            for (const p of state.places) {
-                const x = toX(p.lng), y = toY(p.lat);
-                ctx.fillStyle = p.type === 'home' ? '#4ade80' : p.type === 'work' ? '#3b82f6' : p.type === 'safe' ? '#f59e0b' : '#888';
-                ctx.beginPath();
-                ctx.arc(x, y, 5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#fff';
-                ctx.font = '9px Outfit';
-                ctx.textAlign = 'center';
-                ctx.fillText(p.name, x, y - 8);
-            }
+            state.places.forEach(p => bounds.push([p.lat, p.lng]));
         }
         if (state.showLive && state.currentPosition) {
-            const x = toX(state.currentPosition.lng), y = toY(state.currentPosition.lat);
-            ctx.fillStyle = '#ef4444';
-            ctx.beginPath();
-            ctx.arc(x, y, 7, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+            bounds.push([state.currentPosition.lat, state.currentPosition.lng]);
+        }
+        
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [30, 30], maxZoom: 17 });
         }
     }
 
@@ -1496,7 +1575,12 @@
                 document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
                 tab.classList.add('active');
                 document.getElementById(`${tab.dataset.view}View`).classList.add('active');
-                if (tab.dataset.view === 'map') renderMap();
+                if (tab.dataset.view === 'map') {
+                    setTimeout(() => {
+                        if (!map) initMap();
+                        else { map.invalidateSize(); renderMapLayers(); }
+                    }, 100);
+                }
             });
         });
         el.recordBtn.addEventListener('click', () => state.isRecording ? stopRecording() : startRecording());
@@ -1532,10 +1616,10 @@
         document.getElementById('toggleWet').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.settings.avoidWet = e.target.classList.contains('active'); });
         document.getElementById('toggleFlat').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.settings.preferFlat = e.target.classList.contains('active'); });
         document.getElementById('togglePatterns').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.settings.learnPatterns = e.target.classList.contains('active'); });
-        document.getElementById('mapRoutes').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showRoutes = e.target.classList.contains('active'); renderMap(); });
-        document.getElementById('mapPlaces').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showPlaces = e.target.classList.contains('active'); renderMap(); });
-        document.getElementById('mapLive').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showLive = e.target.classList.contains('active'); renderMap(); });
-        document.getElementById('mapFit').addEventListener('click', renderMap);
+        document.getElementById('mapRoutes').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showRoutes = e.target.classList.contains('active'); renderMapLayers(); });
+        document.getElementById('mapPlaces').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showPlaces = e.target.classList.contains('active'); renderMapLayers(); });
+        document.getElementById('mapLive').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showLive = e.target.classList.contains('active'); renderMapLayers(); });
+        document.getElementById('mapFit').addEventListener('click', fitMapBounds);
         document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', (e) => { if (e.target === ov) ov.classList.remove('active'); }));
         el.routeNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('saveRoute').click(); });
         el.placeNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('savePlace').click(); });
