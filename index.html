@@ -144,6 +144,7 @@
         .map-controls { display: flex; gap: 6px; margin-top: 10px; }
         .map-ctrl-btn { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-secondary); font-size: 0.7rem; cursor: pointer; }
         .map-ctrl-btn.active { border-color: var(--accent); color: var(--accent); }
+        .map-hint { text-align: center; font-size: 0.65rem; color: var(--text-muted); margin-top: 8px; }
         .data-view { padding: 8px 0; }
         .data-actions { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
         .data-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 18px; border-radius: 8px; border: 2px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-family: var(--font-display); font-size: 0.85rem; font-weight: 600; cursor: pointer; }
@@ -292,7 +293,14 @@
             <div class="view" id="mapView">
                 <div class="map-view">
                     <div class="map-container" id="mapContainer"></div>
-                    <div class="map-controls"><button class="map-ctrl-btn active" id="mapRoutes">Routes</button><button class="map-ctrl-btn active" id="mapPlaces">Places</button><button class="map-ctrl-btn active" id="mapLive">Live</button><button class="map-ctrl-btn" id="mapFit">Fit All</button></div>
+                    <div class="map-controls">
+                        <button class="map-ctrl-btn active" id="mapRoutes">Routes</button>
+                        <button class="map-ctrl-btn active" id="mapPlaces">Places</button>
+                        <button class="map-ctrl-btn active" id="mapLive">Live</button>
+                        <button class="map-ctrl-btn" id="mapCenter">Center</button>
+                        <button class="map-ctrl-btn" id="mapFit">Fit All</button>
+                    </div>
+                    <div class="map-hint">Tap anywhere to navigate there</div>
                 </div>
             </div>
             <div class="view" id="dataView">
@@ -936,10 +944,11 @@
         const route = findBestRoute(state.currentPosition, place);
         if (route) {
             state.activeRoute = route;
-            state.currentWaypointIndex = findNearestWaypointIndex(route.points, state.currentPosition);
-            showToast('Following route', 'success');
+            // Use the suggested start waypoint from route matching, or nearest if not provided
+            state.currentWaypointIndex = route.startWaypointIndex ?? findNearestWaypointIndex(route.points, state.currentPosition);
+            showToast(`Following: ${route.name}`, 'success');
         } else {
-            showToast('No route - direct', 'warning');
+            showToast('No route found - direct', 'warning');
         }
         el.noDestination.classList.add('hidden');
         el.compass.classList.remove('hidden');
@@ -967,12 +976,19 @@
 
     function findBestRoute(currentPos, dest) {
         if (!currentPos || !state.routes.length) return null;
-        const threshold = 50;
         const now = new Date();
         const mins = now.getHours() * 60 + now.getMinutes();
         let best = null, bestScore = Infinity;
+        
+        // Find if user is near a saved place (more lenient - 100m for indoor GPS)
+        const nearbyPlace = state.places.find(p => 
+            calculateDistance(currentPos.lat, currentPos.lng, p.lat, p.lng) < 100
+        );
+        
         for (const route of state.routes) {
             if (!route.points || route.points.length < 2) continue;
+            
+            // Check time restrictions
             if (route.tags?.timeStart && route.tags?.timeEnd) {
                 const [sh, sm] = route.tags.timeStart.split(':').map(Number);
                 const [eh, em] = route.tags.timeEnd.split(':').map(Number);
@@ -980,23 +996,53 @@
             }
             if (state.settings.avoidWet && route.tags?.avoidWet) continue;
             if (state.settings.preferFlat && route.hasStairs) continue;
-            const start = route.points[0], end = route.points[route.points.length - 1];
+            
+            const routeStart = route.points[0];
+            const routeEnd = route.points[route.points.length - 1];
+            
+            // Check if route connects to destination (either direction)
+            const endToDest = calculateDistance(routeEnd.lat, routeEnd.lng, dest.lat, dest.lng);
+            const startToDest = calculateDistance(routeStart.lat, routeStart.lng, dest.lat, dest.lng);
+            
             let reversed = false;
-            let endDist = calculate3DDistance(end.lat, end.lng, end.alt, dest.lat, dest.lng, dest.alt);
-            if (endDist > threshold) {
-                const startDist = calculate3DDistance(start.lat, start.lng, start.alt, dest.lat, dest.lng, dest.alt);
-                if (startDist > threshold) continue;
+            let destMatch = false;
+            
+            if (endToDest < 75) {
+                destMatch = true;
+                reversed = false;
+            } else if (startToDest < 75) {
+                destMatch = true;
                 reversed = true;
             }
+            
+            if (!destMatch) continue;
+            
             const pts = reversed ? [...route.points].reverse() : route.points;
-            const nearIdx = findNearestWaypointIndex(pts, currentPos);
-            const nearPt = pts[nearIdx];
-            const nearDist = calculate3DDistance(nearPt.lat, nearPt.lng, nearPt.alt, currentPos.lat, currentPos.lng, currentPos.alt);
-            if (nearDist < threshold) {
-                const score = nearDist + nearIdx * 2 - (route.confidence || 1) * 10 - (route.walkCount || 1) * 5;
-                if (score < bestScore) { bestScore = score; best = { ...route, points: pts }; }
+            const routeOrigin = pts[0]; // Where this route starts (after potential reversal)
+            
+            // Calculate how close route origin is to user
+            let originScore = calculateDistance(routeOrigin.lat, routeOrigin.lng, currentPos.lat, currentPos.lng);
+            
+            // BONUS: If user is near a saved place, and route starts near that same place, big bonus
+            if (nearbyPlace) {
+                const routeToPlace = calculateDistance(routeOrigin.lat, routeOrigin.lng, nearbyPlace.lat, nearbyPlace.lng);
+                if (routeToPlace < 75) {
+                    originScore = 0; // Perfect match - route starts where user is
+                }
+            }
+            
+            // Accept routes where origin is within 150m (generous for GPS drift)
+            if (originScore < 150) {
+                const score = originScore - (route.confidence || 1) * 20 - (route.walkCount || 1) * 10;
+                if (score < bestScore) {
+                    bestScore = score;
+                    // Find where to start on the route based on actual position
+                    const startIdx = findNearestWaypointIndex(pts, currentPos);
+                    best = { ...route, points: pts, startWaypointIndex: startIdx };
+                }
             }
         }
+        
         if (!best && state.routeMesh) best = findMeshRoute(currentPos, dest);
         return best;
     }
@@ -1270,6 +1316,9 @@
     let routeLayers = [];
     let placeMarkers = [];
     let liveMarker = null;
+    let activeRouteLayer = null;
+    let targetMarker = null;
+    let tapMarker = null;
 
     function initMap() {
         if (map) return;
@@ -1297,7 +1346,92 @@
             prefix: ''
         }).addTo(map).addAttribution('© <a href="https://www.openstreetmap.org/">OSM</a>');
         
+        // Tap to navigate
+        map.on('click', handleMapTap);
+        
         renderMapLayers();
+    }
+
+    function handleMapTap(e) {
+        const { lat, lng } = e.latlng;
+        
+        // Remove previous tap marker
+        if (tapMarker) map.removeLayer(tapMarker);
+        
+        // Add tap marker
+        const tapIcon = L.divIcon({
+            className: 'tap-marker',
+            html: `<div style="background:#f59e0b;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(245,158,11,0.6);display:flex;align-items:center;justify-content:center;"><div style="width:6px;height:6px;background:white;border-radius:50%;"></div></div>`,
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+        tapMarker = L.marker([lat, lng], { icon: tapIcon }).addTo(map);
+        
+        // Create popup with navigate button
+        const popupContent = document.createElement('div');
+        popupContent.innerHTML = `
+            <div style="text-align:center;min-width:120px;">
+                <div style="font-size:12px;color:#888;margin-bottom:8px;">${lat.toFixed(5)}, ${lng.toFixed(5)}</div>
+                <button id="mapNavBtn" style="background:#4ade80;color:#000;border:none;padding:8px 16px;border-radius:6px;font-weight:600;cursor:pointer;width:100%;">Navigate Here</button>
+            </div>
+        `;
+        
+        tapMarker.bindPopup(popupContent).openPopup();
+        
+        // Add click handler after popup opens
+        setTimeout(() => {
+            const btn = document.getElementById('mapNavBtn');
+            if (btn) {
+                btn.onclick = () => {
+                    navigateToMapPoint(lat, lng);
+                    map.closePopup();
+                };
+            }
+        }, 100);
+    }
+
+    function navigateToMapPoint(lat, lng) {
+        // Create temporary destination
+        const tempDest = {
+            id: 'map_point',
+            name: 'Map Point',
+            lat: lat,
+            lng: lng,
+            alt: null,
+            type: 'temp'
+        };
+        
+        state.selectedDestination = tempDest;
+        state.activeRoute = null;
+        state.currentWaypointIndex = 0;
+        state.isOffRoute = false;
+        
+        // Try to find a route using intelligence
+        const route = findBestRoute(state.currentPosition, tempDest);
+        if (route) {
+            state.activeRoute = route;
+            state.currentWaypointIndex = route.startWaypointIndex ?? 0;
+            showToast(`Route found: ${route.name}`, 'success');
+        } else {
+            showToast('Direct navigation', 'warning');
+        }
+        
+        el.destinationSelect.value = '';
+        el.noDestination.classList.add('hidden');
+        el.compass.classList.remove('hidden');
+        el.navInfo.classList.remove('hidden');
+        el.offRouteBanner.classList.add('hidden');
+        el.navDestination.textContent = '→ Map Point';
+        
+        if (state.needsCompassPermission) el.calibrateBtn.classList.remove('hidden');
+        else el.calibrateBtn.classList.add('hidden');
+        
+        if (navigator.vibrate) navigator.vibrate(50);
+        updateNavigation();
+        renderMapLayers(); // Refresh map to show active route
+        
+        // Switch to navigate tab
+        document.querySelector('[data-view="navigate"]').click();
     }
 
     function renderMap() {
@@ -1315,24 +1449,29 @@
         routeLayers.forEach(layer => map.removeLayer(layer));
         placeMarkers.forEach(marker => map.removeLayer(marker));
         if (liveMarker) map.removeLayer(liveMarker);
+        if (activeRouteLayer) map.removeLayer(activeRouteLayer);
+        if (targetMarker) map.removeLayer(targetMarker);
         routeLayers = [];
         placeMarkers = [];
         liveMarker = null;
+        activeRouteLayer = null;
+        targetMarker = null;
         
         const bounds = [];
         
-        // Draw routes
+        // Draw saved routes (dimmed if navigating)
         if (state.showRoutes && state.routes.length > 0) {
             for (const route of state.routes) {
                 if (!route.points || route.points.length < 2) continue;
                 
                 const latlngs = route.points.map(p => [p.lat, p.lng]);
+                const isActive = state.activeRoute && state.activeRoute.id === route.id;
                 const color = route.hasStairs ? '#ef4444' : '#4ade80';
                 
                 const polyline = L.polyline(latlngs, {
                     color: color,
-                    weight: 4,
-                    opacity: 0.8
+                    weight: isActive ? 6 : 3,
+                    opacity: state.activeRoute ? (isActive ? 1 : 0.3) : 0.8
                 }).addTo(map);
                 
                 polyline.bindPopup(`<strong>${route.name}</strong><br>${(route.distance/1000).toFixed(2)}km`);
@@ -1342,18 +1481,36 @@
             }
         }
         
+        // Draw active navigation route (highlighted)
+        if (state.activeRoute?.points) {
+            const remainingPts = state.activeRoute.points.slice(state.currentWaypointIndex);
+            if (remainingPts.length > 1) {
+                const latlngs = remainingPts.map(p => [p.lat, p.lng]);
+                activeRouteLayer = L.polyline(latlngs, {
+                    color: '#3b82f6',
+                    weight: 6,
+                    opacity: 1,
+                    dashArray: '10, 10'
+                }).addTo(map);
+                latlngs.forEach(ll => bounds.push(ll));
+            }
+        }
+        
         // Draw places
         if (state.showPlaces && state.places.length > 0) {
             for (const place of state.places) {
-                const color = place.type === 'home' ? '#4ade80' : 
+                const isDestination = state.selectedDestination && state.selectedDestination.id === place.id;
+                const color = isDestination ? '#3b82f6' :
+                              place.type === 'home' ? '#4ade80' : 
                               place.type === 'work' ? '#3b82f6' : 
                               place.type === 'safe' ? '#f59e0b' : '#888';
                 
+                const size = isDestination ? 18 : 14;
                 const icon = L.divIcon({
                     className: 'custom-marker',
-                    html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>`,
-                    iconSize: [14, 14],
-                    iconAnchor: [7, 7]
+                    html: `<div style="background:${color};width:${size}px;height:${size}px;border-radius:50%;border:${isDestination ? 3 : 2}px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);${isDestination ? 'box-shadow:0 0 12px rgba(59,130,246,0.6);' : ''}"></div>`,
+                    iconSize: [size, size],
+                    iconAnchor: [size/2, size/2]
                 });
                 
                 const marker = L.marker([place.lat, place.lng], { icon: icon }).addTo(map);
@@ -1362,6 +1519,19 @@
                 
                 bounds.push([place.lat, place.lng]);
             }
+        }
+        
+        // Draw destination (if map point or not a saved place)
+        if (state.selectedDestination && state.selectedDestination.type === 'temp') {
+            const destIcon = L.divIcon({
+                className: 'dest-marker',
+                html: `<div style="background:#3b82f6;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 12px rgba(59,130,246,0.6);display:flex;align-items:center;justify-content:center;"><div style="width:6px;height:6px;background:white;border-radius:50%;"></div></div>`,
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            targetMarker = L.marker([state.selectedDestination.lat, state.selectedDestination.lng], { icon: destIcon }).addTo(map);
+            targetMarker.bindPopup('Destination');
+            bounds.push([state.selectedDestination.lat, state.selectedDestination.lng]);
         }
         
         // Draw current position
@@ -1379,9 +1549,10 @@
             bounds.push([state.currentPosition.lat, state.currentPosition.lng]);
         }
         
-        // Fit bounds if we have data
-        if (bounds.length > 0) {
+        // Fit bounds if we have data (only on first load or fit button)
+        if (bounds.length > 0 && !map._boundsSet) {
             map.fitBounds(bounds, { padding: [30, 30], maxZoom: 17 });
+            map._boundsSet = true;
         }
     }
 
@@ -1620,6 +1791,13 @@
         document.getElementById('mapPlaces').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showPlaces = e.target.classList.contains('active'); renderMapLayers(); });
         document.getElementById('mapLive').addEventListener('click', (e) => { e.target.classList.toggle('active'); state.showLive = e.target.classList.contains('active'); renderMapLayers(); });
         document.getElementById('mapFit').addEventListener('click', fitMapBounds);
+        document.getElementById('mapCenter').addEventListener('click', () => {
+            if (map && state.currentPosition) {
+                map.setView([state.currentPosition.lat, state.currentPosition.lng], 17);
+            } else {
+                showToast('No GPS position', 'error');
+            }
+        });
         document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', (e) => { if (e.target === ov) ov.classList.remove('active'); }));
         el.routeNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('saveRoute').click(); });
         el.placeNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('savePlace').click(); });
